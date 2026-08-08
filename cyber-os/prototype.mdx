@@ -1,0 +1,47 @@
+---
+title: "Prototype Guide"
+description: "Interactive prototype map and implementation roadmap."
+---
+
+# Interactive Prototype
+
+The CYBER-OS prototype is implemented as a clickable operations-center interface.
+
+## Prototype areas
+
+- Dashboard — profile-aware operations overview.
+- Workspaces — Red, Blue, Purple, DFIR, DevSecOps, Threat Intel, NOC, Executive, and AI Operations.
+- Layout — dock, resize, drag, save, import/export.
+- Multi-monitor — screen-aware workspace layouts.
+- Widgets — marketplace and dashboard composition.
+- Network — topology and asset relationships.
+- Attack Path — interactive relationship graph.
+- Timeline — event correlation and filtering.
+- Fleet — host inventory and health.
+- Clusters — Kubernetes, Docker, Swarm, and Proxmox-style monitoring surfaces.
+- Plugins — dependency graph and catalog.
+- Automation — visual AI workflow builder.
+- Notes — contextual knowledge attached to operational objects.
+- Design System — component and token reference.
+
+## Implementation roadmap
+
+### Phase 1 — UI foundation
+
+Lock tokens, reusable components, workspace state, routing, layout persistence, and accessibility.
+
+### Phase 2 — Operational data model
+
+Introduce typed entities for assets, events, findings, tools, plugins, cases, workflows, and notes.
+
+### Phase 3 — Local integrations
+
+Connect approved system telemetry, containers, virtualization, and local AI services behind explicit permission boundaries.
+
+### Phase 4 — Lab orchestration
+
+Add isolated training environments, snapshots, network segmentation, and lifecycle controls.
+
+### Phase 5 — Production hardening
+
+Add authentication, authorization, audit logging, secrets handling, update management, testing, and packaging.
