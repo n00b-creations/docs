@@ -1,0 +1,31 @@
+---
+title: "Architecture"
+description: "Architecture reference for the CYBER-OS workspace."
+---
+
+# Architecture
+
+CYBER-OS is being developed as a modular cybersecurity workstation rather than as a monolithic modification of a Linux distribution.
+
+## Core layers
+
+| Layer | Responsibility |
+| --- | --- |
+| Workspace | Profiles, layouts, panels, persistence, and multi-monitor state |
+| Dashboard | Operational widgets, status, alerts, topology, and workflow views |
+| Modules | Red team, blue team, purple team, DFIR, OSINT, cloud, wireless, malware-analysis, and reporting capabilities |
+| AI | Assistants, workflows, retrieval, local-model integrations, and automation |
+| Virtualization | VM and container lifecycle management for controlled labs |
+| Integrations | External tools, APIs, MCP services, and platform adapters |
+
+## Workspace interaction
+
+The target interaction flow is:
+
+`Profile Switcher → Profile Preset → WorkspaceManager → LayoutController → Persistence → Rendered Workspace`
+
+A functional workspace must preserve layout state across reloads and enforce panel bounds, docking, resizing, collision handling, and reset behavior.
+
+## Implementation status
+
+This documentation repository should not claim a subsystem is operational until the corresponding implementation and verification exist in the source repository. Use explicit labels such as **implemented**, **experimental**, or **planned** when documenting incomplete capabilities.

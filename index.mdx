@@ -3,18 +3,34 @@ title: "Introduction"
 description: "Welcome to your project"
 ---
 
-Write a short description of your product here. What it does, who it's for, and what they can accomplish with it.
+# CYBER-OS
 
-<Tip>
-  Ready to make this your own? Start by editing this page. Update your `docs.json` file to customize your site. Then fill out the [Quickstart](/quickstart) page.
-</Tip>
+CYBER-OS is a modular cybersecurity operations workspace designed to bring security workflows, tooling, automation, virtualization, and AI-assisted operations into a unified environment.
+
+This documentation is the operational reference for the project. It should describe what is implemented, how to configure it, and how to verify that each subsystem is functioning.
+
+## Documentation status
+
+The documentation repository is connected to the `n00b-creations/docs` GitHub repository and deploys from the `main` branch through Mintlify.
+
+Use the **Quickstart** to validate a local documentation checkout before making changes.
 
 <Card title="Quickstart" icon="rocket" href="/quickstart">
-  This card links to the quickstart page in your project.
+  Verify the documentation environment and begin working on CYBER-OS.
 </Card>
-<Card title="Components" icon="puzzle-piece" href="https://mintlify.com/docs/components">
-  Add cards, callouts, steps, tabs, and more to design and structure your pages.
+
+<Card title="Architecture" icon="diagram-project" href="/architecture">
+  Document the workspace, modules, integrations, and runtime boundaries.
 </Card>
-<Card title="Settings" icon="gear" href="https://mintlify.com/docs/organize/settings">
-  Set your site name, branding, and navigation in the `docs.json` file.
+
+<Card title="Operations" icon="server" href="/operations">
+  Document health checks, deployment behavior, troubleshooting, and operational procedures.
 </Card>
+
+## Documentation principles
+
+- Document implemented behavior rather than planned behavior as if it already exists.
+- Keep commands, paths, configuration names, and environment variables exact.
+- Mark experimental or planned capabilities explicitly.
+- Update documentation whenever an implementation or interface changes.
+- Prefer reproducible verification steps over screenshots or assumptions.

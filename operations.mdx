@@ -1,0 +1,29 @@
+---
+title: "Operations"
+description: "Operational verification and troubleshooting for CYBER-OS documentation."
+---
+
+# Operations
+
+Use this page as the baseline operational checklist for the documentation deployment.
+
+## Deployment source
+
+The active Mintlify deployment is connected to the `n00b-creations/docs` GitHub repository and uses `main` as its deployment branch.
+
+## Health checks
+
+1. Confirm the repository contains `docs.json` at its configured content root.
+2. Confirm every page referenced by navigation exists.
+3. Run the Mintlify local preview with `mint dev`.
+4. Exercise the landing page and every navigation link.
+5. Check the browser console and CLI output for MDX, configuration, or asset errors.
+6. Review the deployment after publishing changes.
+
+## Operational rule
+
+A successful documentation deployment proves that the documentation site builds and serves. It does **not** prove that the CYBER-OS application code, agents, plugins, virtual machines, or security tooling are operational. Those components require repository-level build and runtime tests in their respective source repositories.
+
+## Known repository condition
+
+The documentation tree was originally a Mintlify starter shell. Placeholder content has been removed from the primary introduction and quickstart pages. The remaining application documentation should be added from verified implementation details rather than inferred from the project roadmap.
