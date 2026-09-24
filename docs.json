@@ -31,7 +31,8 @@
             "group": "Build Stages",
             "pages": [
               "leadops-build/conversation",
-              "leadops-build/stage-11-enterprise-integrations"
+              "leadops-build/stage-11-enterprise-integrations",
+              "leadops-build/stage-12-workflow-automation"
             ]
           }
         ]
