@@ -33,7 +33,8 @@
               "leadops-build/conversation",
               "leadops-build/stage-11-enterprise-integrations",
               "leadops-build/stage-12-workflow-automation",
-              "leadops-build/stage-13-command-center"
+              "leadops-build/stage-13-command-center",
+              "leadops-build/stage-14-production-frontend"
             ]
           }
         ]
