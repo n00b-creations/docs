@@ -1,0 +1,874 @@
+---
+title: "Stage 13 — Visual LeadOps Command Center"
+sidebarTitle: "Stage 13 — Command Center"
+description: "Unified operational interface for LeadOps intelligence, automation, revenue, agents, approvals, integrations, and audit."
+---
+
+# Stage 13 — Visual LeadOps Command Center
+
+Stage 13 turns the LeadOps platform into a unified operational console. The objective is not another dashboard layered on top of the system; it is the primary operator interface for the intelligence, revenue, control-plane, integration, workflow, agent, approval, and audit capabilities built in Stages 6–12.
+
+## 1. Stage Objective
+
+The Command Center consolidates:
+
+- Lead and opportunity intelligence
+- Revenue and funnel performance
+- Autonomous agents and agent tasks
+- Workflow definitions and live executions
+- Integration health and synchronization
+- Human approvals
+- Policy decisions and blocks
+- Real-time events
+- Audit history
+- Search, command, and drill-down workflows
+
+The core interaction model is:
+
+```text
+USER
+  ↓
+COMMAND CENTER
+  ├── Search / Command
+  ├── Workspace
+  ├── Queue / Pipeline
+  ├── Intelligence
+  ├── Automation
+  ├── Revenue
+  ├── Integrations
+  ├── Agent Operations
+  └── Audit / Administration
+          ↓
+     API / BFF
+          ↓
+  LeadOps Control Plane
+          ↓
+ Intelligence • Workflows • Agents • Integrations • Revenue
+```
+
+The server remains authoritative. The browser is an operational view and command surface, not a second source of truth.
+
+---
+
+## 2. Command Center Workspaces
+
+The shell should support role-aware workspaces rather than forcing every user into one dense screen.
+
+### Executive
+
+Focus:
+
+- Pipeline value
+- Expected revenue
+- Conversion funnel
+- Revenue forecast
+- SLA risk
+- Workflow health
+- High-value opportunities
+
+### Sales
+
+Focus:
+
+- Lead queue
+- Opportunity board
+- Next-best actions
+- Appointments
+- Follow-up tasks
+- Rep workload
+- Lead detail
+
+### Intelligence
+
+Focus:
+
+- Signal stream
+- Opportunity scores
+- Enrichment status
+- Intent signals
+- Geographic patterns
+- Research tasks
+
+### Automation
+
+Focus:
+
+- Workflow builder
+- Active executions
+- Failed executions
+- Waiting approvals
+- Policy blocks
+- Retry/dead-letter queues
+
+### Revenue
+
+Focus:
+
+- Attribution
+- Unit economics
+- Funnel performance
+- Expected revenue
+- Forecast scenarios
+- Experiment performance
+
+### Integrations
+
+Focus:
+
+- Connector health
+- Sync status
+- Authentication
+- Capabilities
+- Mapping errors
+- Webhook activity
+
+### Agent Operations
+
+Focus:
+
+- Agent registry
+- Agent health
+- Current tasks
+- Queue depth
+- Cost
+- Failure rate
+- Capability permissions
+
+### Admin / Audit
+
+Focus:
+
+- Users
+- Roles
+- Policies
+- Approvals
+- Audit events
+- Tenant configuration
+- Security controls
+
+Navigation and available commands must be filtered by RBAC/ABAC and capability permissions.
+
+---
+
+## 3. Application Shell
+
+Recommended layout:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Logo │ Workspace │ Global Search / Command │ Alerts │ Approvals │ User     │
+├──────┼──────────────────────────────────────────────────────────────────────┤
+│      │ KPI STRIP                                                            │
+│ NAV  ├───────────────────────────────────────┬───────────────────────────────┤
+│      │ Main Workspace                        │ Context / Detail Drawer       │
+│ •    │                                       │                               │
+│ •    │ Pipeline / Intelligence / Workflow    │ Lead / Agent / Execution     │
+│ •    │                                       │                               │
+│ •    │                                       │                               │
+├──────┴───────────────────────────────────────┴───────────────────────────────┤
+│ Live Event Stream / System Status / Connection State                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+The shell should support:
+
+- Dockable panels
+- Resizable detail drawers
+- Saved views
+- Full-screen workspace mode
+- Keyboard navigation
+- Deep links
+- Multi-density display modes
+- Responsive layouts
+- Persistent workspace preferences
+
+---
+
+## 4. Core UI Components
+
+### Command Palette
+
+Global commands should include:
+
+- Search lead
+- Search account
+- Search opportunity
+- Open workflow
+- Run workflow
+- Pause workflow
+- Resume workflow
+- View failed executions
+- View approvals
+- Open agent
+- Open integration
+- Create task
+- Create workflow
+- Switch workspace
+- Open audit trail
+
+Destructive commands must require the same policy checks as their API equivalents.
+
+### Global Search
+
+Search across canonical LeadOps entities:
+
+```text
+Lead
+Account
+Contact
+Opportunity
+Signal
+Workflow
+Execution
+Agent
+Task
+Integration
+Approval
+Event
+```
+
+Search results should expose entity type, tenant-safe metadata, relevance, current status, and a direct deep link.
+
+### Saved Views
+
+A saved view contains:
+
+- Workspace
+- Entity
+- Filters
+- Sort order
+- Columns
+- Grouping
+- Display density
+- Time range
+- Permission scope
+
+Saved views must be tenant-scoped and permission-aware.
+
+---
+
+## 5. Lead 360 View
+
+The lead drawer/page becomes the operational center for an individual prospect.
+
+```text
+Lead
+├── Identity
+├── Contactability
+├── Qualification
+├── Opportunity Score
+├── Intent Signals
+├── Enrichment
+├── Revenue Potential
+├── Current Owner
+├── Next-Best Action
+├── Workflow State
+├── Communications
+├── Appointments
+├── Consent / Suppression
+├── Related Account
+└── Complete Timeline
+```
+
+The timeline should combine canonical events from:
+
+- Intelligence
+- CRM
+- Marketing
+- Communications
+- Calendar
+- Workflow execution
+- Agent activity
+- Human actions
+- Policy decisions
+
+Source attribution must remain visible so operators can distinguish external events, inferred intelligence, automation, and human actions.
+
+---
+
+## 6. Pipeline and Opportunity Workspace
+
+The pipeline workspace should support:
+
+- Table view
+- Kanban view
+- Funnel view
+- Geographic view
+- Revenue-weighted view
+- SLA-risk view
+
+Opportunity cards should expose:
+
+- Opportunity score
+- Expected revenue
+- Stage
+- Owner
+- Freshness
+- Top signal
+- Next-best action
+- Last activity
+- Appointment status
+
+Filtering must use server-side authoritative query parameters for large datasets.
+
+---
+
+## 7. Workflow Operations
+
+Stage 12 introduced the workflow engine. Stage 13 makes it operationally visible.
+
+### Workflow List
+
+Show:
+
+- Status
+- Version
+- Trigger
+- Active executions
+- Success rate
+- Failure rate
+- Average execution time
+- Last execution
+- Policy blocks
+- Connector dependencies
+
+### Execution Timeline
+
+Example:
+
+```text
+Trigger
+  ↓
+Normalize Lead
+  ✓
+Enrich Account
+  ✓
+Score Opportunity
+  ✓
+Policy Gate
+  ✓
+Assign Rep
+  ✓
+Send Approved Message
+  ✓
+Create Follow-Up
+  WAITING
+```
+
+Each node must expose:
+
+- Input summary
+- Output summary
+- Duration
+- Retry count
+- Policy result
+- Agent/task identifier
+- Connector used
+- Error details
+- Audit events
+
+Sensitive values must be redacted according to tenant policy.
+
+---
+
+## 8. Agent Operations Center
+
+The agent console should expose the control-plane state without exposing hidden model reasoning.
+
+Agent cards:
+
+- Agent name
+- Version
+- Status
+- Capability scopes
+- Current task
+- Queue depth
+- Success rate
+- Failure rate
+- Average latency
+- Cost
+- Last heartbeat
+
+Agent task lifecycle:
+
+```text
+QUEUED
+  ↓
+ASSIGNED
+  ↓
+RUNNING
+  ├── COMPLETED
+  ├── FAILED → RETRY
+  ├── WAITING
+  └── DEAD_LETTER
+```
+
+Operators can inspect task inputs/outputs subject to permissions, but model chain-of-thought is never treated as an operational artifact.
+
+---
+
+## 9. Approval Center
+
+The approval center aggregates human-in-the-loop decisions.
+
+Approval records should include:
+
+- Request type
+- Entity
+- Proposed action
+- Reason/context
+- Policy that caused approval
+- Requesting agent/workflow
+- Risk classification
+- Created time
+- Expiration
+- Approver
+- Decision
+- Decision timestamp
+
+Actions:
+
+```text
+APPROVE
+REJECT
+REQUEST_CHANGES
+ESCALATE
+EXPIRE
+```
+
+Approval decisions become immutable audit events.
+
+---
+
+## 10. Integration Center
+
+The integration workspace consumes Stage 11 and Stage 12 connector state.
+
+Display:
+
+- Connector status
+- Authentication status
+- Last sync
+- Sync lag
+- Webhook health
+- Error rate
+- Capabilities
+- Granted scopes
+- Mapping status
+- Rate-limit state
+
+A provider failure should isolate the affected integration rather than taking down the LeadOps core.
+
+---
+
+## 11. Real-Time Event Architecture
+
+The Command Center should receive operational updates through a dedicated realtime gateway.
+
+```text
+Domain Events
+     ↓
+Event Bus
+     ↓
+Realtime Gateway
+     ↓
+WebSocket / SSE
+     ↓
+Browser Event Store
+     ↓
+Workspace Selectors
+     ↓
+UI
+```
+
+Recommended event envelope:
+
+```ts
+interface CommandCenterEvent {
+  id: string;
+  tenantId: string;
+  sequence: number;
+  type: string;
+  entityType: string;
+  entityId: string;
+  occurredAt: string;
+  version: number;
+  source: string;
+  payload: unknown;
+}
+```
+
+Required behavior:
+
+- Sequence numbers
+- Cursor-based recovery
+- Heartbeats
+- Reconnection
+- Backoff
+- Duplicate detection
+- Event versioning
+- Tenant filtering
+- Permission filtering
+
+The browser should never assume that an event represents final authoritative state. For critical mutations, refetch the authoritative resource after the event.
+
+---
+
+## 12. Frontend State Model
+
+Separate state into three classes.
+
+### Server State
+
+Examples:
+
+- Leads
+- Opportunities
+- Workflows
+- Agents
+- Integrations
+- Approvals
+- Revenue metrics
+
+Server state is cached but authoritative data comes from APIs.
+
+### UI State
+
+Examples:
+
+- Selected workspace
+- Open drawer
+- Filters
+- Sort order
+- Layout
+- Theme
+- Density
+
+### Ephemeral State
+
+Examples:
+
+- Hover
+- Drag position
+- Temporary form state
+- Command palette query
+- Connection animation
+
+This separation prevents transient UI behavior from contaminating domain state.
+
+---
+
+## 13. Recommended Repository Structure
+
+```text
+apps/
+└── web/
+    ├── app/
+    │   ├── command-center/
+    │   ├── leads/
+    │   ├── opportunities/
+    │   ├── workflows/
+    │   ├── agents/
+    │   ├── integrations/
+    │   ├── approvals/
+    │   ├── revenue/
+    │   └── admin/
+    │
+    ├── components/
+    │   ├── shell/
+    │   ├── navigation/
+    │   ├── command-palette/
+    │   ├── search/
+    │   ├── data-table/
+    │   ├── kanban/
+    │   ├── timeline/
+    │   ├── charts/
+    │   ├── drawers/
+    │   ├── status/
+    │   └── accessibility/
+    │
+    ├── features/
+    │   ├── pipeline/
+    │   ├── intelligence/
+    │   ├── automation/
+    │   ├── revenue/
+    │   ├── integrations/
+    │   ├── agents/
+    │   ├── approvals/
+    │   └── audit/
+    │
+    ├── realtime/
+    │   ├── client.ts
+    │   ├── event-store.ts
+    │   ├── subscriptions.ts
+    │   ├── reconnect.ts
+    │   └── cursors.ts
+    │
+    ├── state/
+    │   ├── server/
+    │   ├── ui/
+    │   └── ephemeral/
+    │
+    ├── hooks/
+    ├── lib/
+    └── tests/
+        ├── unit/
+        ├── integration/
+        ├── accessibility/
+        └── e2e/
+```
+
+---
+
+## 14. Command Center API / BFF
+
+A dedicated BFF reduces frontend coupling to internal services.
+
+```text
+GET  /command-center/overview
+GET  /command-center/pipeline
+GET  /command-center/intelligence
+GET  /command-center/revenue
+GET  /command-center/agents
+GET  /command-center/workflows
+GET  /command-center/workflows/:id
+GET  /command-center/executions
+GET  /command-center/approvals
+GET  /command-center/integrations
+GET  /command-center/events
+GET  /command-center/search
+GET  /command-center/activity
+
+POST /command-center/commands
+POST /command-center/workflows/:id/actions
+POST /command-center/approvals/:id/decision
+POST /command-center/views
+PUT  /command-center/views/:id
+DELETE /command-center/views/:id
+```
+
+The BFF should aggregate read models but delegate mutations to the Stage 9 control plane.
+
+---
+
+## 15. Design System
+
+Create a shared design system instead of styling each workspace independently.
+
+### Tokens
+
+- Color
+- Typography
+- Spacing
+- Radius
+- Shadows
+- Borders
+- Density
+- Motion
+- Z-index
+- Breakpoints
+
+### Accessibility
+
+Target:
+
+- Keyboard-complete navigation
+- Visible focus
+- Screen-reader labels
+- Semantic landmarks
+- Sufficient contrast
+- Reduced-motion support
+- Accessible tables
+- Accessible dialogs
+- Accessible drag/drop alternatives
+
+No operational action should require a pointer-only interaction.
+
+---
+
+## 16. Security Model
+
+The Command Center must enforce security at the API boundary and reflect permissions in the UI.
+
+```text
+UI Permission Check
+       ↓
+BFF Authorization
+       ↓
+Control Plane Policy
+       ↓
+Tenant Authorization
+       ↓
+Capability Scope
+       ↓
+Execution
+       ↓
+Audit
+```
+
+Hiding a button is not authorization.
+
+Every mutation must be re-authorized server-side.
+
+Sensitive information should be masked in:
+
+- Lead contact data
+- Credentials
+- API tokens
+- Provider responses
+- Communication content
+- Agent inputs/outputs
+- Audit metadata
+
+---
+
+## 17. Observability
+
+The Command Center itself requires telemetry.
+
+Track:
+
+- Page load latency
+- API latency
+- WebSocket connection health
+- Event lag
+- Search latency
+- Workflow action latency
+- Error rate
+- UI crash rate
+- Authorization failures
+- Stale-data incidents
+
+Operational dashboards should distinguish:
+
+```text
+SYSTEM HEALTH
+APPLICATION HEALTH
+INTEGRATION HEALTH
+AUTOMATION HEALTH
+AGENT HEALTH
+DATA FRESHNESS
+```
+
+---
+
+## 18. Performance Strategy
+
+Large tenant datasets must not be rendered wholesale.
+
+Required patterns:
+
+- Cursor pagination
+- Virtualized tables
+- Server-side filtering
+- Server-side sorting
+- Incremental event ingestion
+- Lazy-loaded workspaces
+- Memoized selectors
+- Query caching
+- Batched requests
+- Debounced search
+- Background refresh
+- Stale-while-revalidate where safe
+
+The realtime layer should update affected records rather than forcing complete dashboard reloads.
+
+---
+
+## 19. Acceptance Tests
+
+Stage 13 is complete when:
+
+### Navigation
+
+- Role-specific navigation is enforced.
+- Unauthorized workspaces cannot be accessed directly.
+- Deep links resolve correctly.
+- Saved views persist.
+
+### Data
+
+- Server state is authoritative.
+- Filters are tenant-scoped.
+- Large tables use pagination/virtualization.
+- Stale data is visibly identifiable when relevant.
+
+### Realtime
+
+- Connections reconnect automatically.
+- Duplicate events do not duplicate UI state.
+- Sequence gaps trigger cursor recovery.
+- Events are tenant- and permission-filtered.
+
+### Workflows
+
+- Execution timelines show node-level state.
+- Failed nodes expose actionable diagnostics.
+- Approval states update in real time.
+- Policy blocks remain visible.
+
+### Agents
+
+- Agent health is visible.
+- Tasks can be inspected according to permissions.
+- Retry/dead-letter state is visible.
+- No hidden model reasoning is surfaced.
+
+### Integrations
+
+- Connector health is visible.
+- Sync lag is visible.
+- Provider failures are isolated.
+- Credential values never appear in UI payloads.
+
+### Security
+
+- Every mutation is server-authorized.
+- Tenant isolation is tested.
+- Sensitive fields are redacted.
+- Audit events are generated for privileged actions.
+
+### Accessibility
+
+- Keyboard navigation works across primary workflows.
+- Dialogs and drawers are accessible.
+- Focus management is correct.
+- Reduced-motion mode works.
+
+---
+
+## 20. Stage 13 Completion State
+
+At the end of Stage 13, LeadOps has a unified operational interface over the platform built in Stages 6–12:
+
+```text
+INTELLIGENCE
+    ↓
+OPPORTUNITIES
+    ↓
+REVENUE
+    ↓
+WORKFLOWS
+    ↓
+AGENTS
+    ↓
+CONTROL PLANE
+    ↓
+POLICY / APPROVAL
+    ↓
+INTEGRATIONS
+    ↓
+EXECUTION
+    ↓
+AUDIT / TELEMETRY
+    ↓
+COMMAND CENTER
+```
+
+The Command Center is therefore the presentation and operational layer for the existing platform, while the control plane remains responsible for authorization, policy, execution, and durable state.
+
+## Next Build Boundary
+
+**Stage 14 — Production Frontend Implementation & Design System**
+
+Stage 14 should convert this architecture into the actual production frontend: application shell, navigation, workspace routing, reusable component library, realtime client, API/BFF integration, lead 360 screen, pipeline, workflow execution inspector, agent operations, approval center, integration health, responsive layouts, accessibility testing, and end-to-end test coverage.

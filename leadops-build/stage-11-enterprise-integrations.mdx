@@ -1,0 +1,412 @@
+---
+title: "Stage 11 — Enterprise Integrations & LeadOps Ecosystem"
+sidebarTitle: "Stage 11 — Integrations"
+description: "Enterprise integration, connector, synchronization, and event architecture for LeadOps."
+---
+
+# Stage 11 — Enterprise Integrations & LeadOps Ecosystem
+
+Stage 11 connects the production LeadOps core to the external business systems that generate, enrich, communicate with, schedule, monetize, and report on leads.
+
+## Architecture
+
+```
+External Systems
+      ↓
+Integration Gateway
+      ↓
+Connector Registry
+      ↓
+Adapter Layer
+      ↓
+Canonical LeadOps Events
+      ↓
+Event Bus
+      ↓
+Control Plane / Intelligence / Revenue
+```
+
+## Repository additions
+
+```
+leadops/
+├── integrations/
+│   ├── registry/
+│   │   ├── integration-registry.ts
+│   │   ├── connector-manifest.ts
+│   │   └── capability-registry.ts
+│   ├── adapters/
+│   │   ├── crm/
+│   │   ├── marketing/
+│   │   ├── communications/
+│   │   ├── calendar/
+│   │   ├── payments/
+│   │   ├── enrichment/
+│   │   └── analytics/
+│   ├── authentication/
+│   ├── webhooks/
+│   ├── synchronization/
+│   ├── mapping/
+│   ├── health/
+│   └── marketplace/
+├── events/
+│   ├── contracts/
+│   ├── publishers/
+│   ├── consumers/
+│   └── schemas/
+├── sync/
+│   ├── inbound/
+│   ├── outbound/
+│   ├── reconciliation/
+│   └── checkpoints/
+└── tests/
+    └── integrations/
+```
+
+## Connector contract
+
+External providers should implement a common contract:
+
+```ts
+export interface IntegrationAdapter {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  health(): Promise<IntegrationHealth>;
+
+  capabilities(): IntegrationCapability[];
+
+  handleEvent(event: ExternalEvent): Promise<void>;
+
+  sync(request: SyncRequest): Promise<SyncResult>;
+}
+```
+
+This prevents provider-specific behavior from leaking into the core LeadOps domain.
+
+## Integration categories
+
+### CRM
+
+- Contact synchronization
+- Lead synchronization
+- Opportunity synchronization
+- Activity synchronization
+- Ownership synchronization
+- Pipeline synchronization
+
+### Communications
+
+- Email
+- SMS
+- Voice
+- Conversation history
+- Delivery status
+- Opt-out/suppression events
+
+### Calendar
+
+- Availability
+- Appointment creation
+- Appointment updates
+- Cancellations
+- Reminders
+- Show/no-show outcomes
+
+### Marketing
+
+- Campaign events
+- Form submissions
+- Advertising attribution
+- Landing-page activity
+- Conversion events
+
+### Revenue
+
+- Proposals
+- Contracts
+- Payments
+- Refunds
+- Revenue events
+
+### Analytics
+
+- Data warehouse
+- BI
+- Product analytics
+- Attribution systems
+
+## Canonical event model
+
+LeadOps should translate provider-specific events into canonical events:
+
+```text
+provider.event
+      ↓
+verification
+      ↓
+normalization
+      ↓
+canonical event
+      ↓
+LeadOps event bus
+```
+
+Example:
+
+```ts
+interface LeadCreatedEvent {
+  type: "lead.created";
+
+  eventId: string;
+  tenantId: string;
+
+  occurredAt: string;
+
+  leadId: string;
+
+  source: {
+    provider: string;
+    externalId: string;
+  };
+}
+```
+
+## Synchronization model
+
+Use checkpointed synchronization:
+
+```
+INITIAL SYNC
+    ↓
+CHECKPOINT
+    ↓
+INCREMENTAL SYNC
+    ↓
+CHECKPOINT
+    ↓
+RECONCILIATION
+```
+
+A synchronization job should track:
+
+```text
+provider
+tenant
+cursor
+lastSuccessfulSync
+recordsRead
+recordsCreated
+recordsUpdated
+recordsSkipped
+errors
+```
+
+## Conflict resolution
+
+Provider data must not automatically overwrite authoritative LeadOps state.
+
+Use:
+
+```
+Policy
+  ↓
+System-of-record designation
+  ↓
+Field-level authority
+  ↓
+Timestamp/version comparison
+  ↓
+Conflict resolution
+  ↓
+Audit
+```
+
+Example field authority:
+
+```yaml
+lead:
+  phone:
+    authority: crm
+  lifecycleStage:
+    authority: leadops
+  consent:
+    authority: leadops
+  appointment:
+    authority: calendar
+  revenue:
+    authority: revenue-system
+```
+
+## Connector health
+
+Every integration exposes:
+
+```text
+CONNECTED
+DEGRADED
+AUTHENTICATION_REQUIRED
+RATE_LIMITED
+PROVIDER_OUTAGE
+SYNC_ERROR
+DISABLED
+```
+
+Dashboard:
+
+```
+Integration Health
+────────────────────────────────
+CRM              ● Connected
+Email            ● Connected
+SMS              ● Connected
+Calendar         ● Connected
+Payments         ● Connected
+Enrichment       ● Degraded
+Analytics        ● Connected
+```
+
+## Integration permissions
+
+A connector receives only the capabilities it needs.
+
+Example:
+
+```yaml
+integration:
+  capabilities:
+    - lead.read
+    - lead.create
+    - activity.write
+
+  prohibited:
+    - tenant.settings.write
+    - policy.modify
+    - audit.delete
+```
+
+This preserves the Stage 9 control-plane authority boundary.
+
+## Integration lifecycle
+
+```
+DISCOVERED
+    ↓
+INSTALLING
+    ↓
+AUTHENTICATING
+    ↓
+CONNECTED
+    ↓
+SYNCING
+    ↓
+ACTIVE
+    ↓
+DEGRADED / DISABLED
+```
+
+## Stage 11 API
+
+```text
+GET  /integrations
+GET  /integrations/:id
+POST /integrations/:id/connect
+POST /integrations/:id/disconnect
+GET  /integrations/:id/health
+GET  /integrations/:id/capabilities
+POST /integrations/:id/sync
+GET  /integrations/:id/sync/status
+GET  /integrations/:id/events
+POST /integrations/:id/reconcile
+```
+
+## Integration database
+
+```sql
+CREATE TABLE integrations (
+    id UUID PRIMARY KEY,
+    tenant_id UUID NOT NULL,
+
+    provider TEXT NOT NULL,
+    category TEXT NOT NULL,
+
+    status TEXT NOT NULL,
+
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    UNIQUE (tenant_id, provider)
+);
+```
+
+Credentials should be referenced through the secrets subsystem rather than stored directly in this table.
+
+## Connector marketplace
+
+Stage 11 also establishes the foundation for an integration marketplace:
+
+```
+Integration Catalog
+      ↓
+Install
+      ↓
+Permission Review
+      ↓
+Authentication
+      ↓
+Connection Test
+      ↓
+Enable
+```
+
+Each connector manifest can declare:
+
+```ts
+interface ConnectorManifest {
+  id: string;
+  name: string;
+  version: string;
+
+  category: string;
+
+  capabilities: string[];
+
+  requiredScopes: string[];
+
+  webhookSupport: boolean;
+
+  syncSupport: boolean;
+}
+```
+
+## Stage 11 acceptance criteria
+
+- Provider adapters cannot bypass tenant isolation.
+- Provider credentials are stored through the secrets subsystem.
+- External events are verified before entering the event bus.
+- Provider events normalize into canonical LeadOps events.
+- Synchronization is checkpointed and resumable.
+- Duplicate events are idempotent.
+- Conflicts follow explicit field/system authority rules.
+- Connector health is observable.
+- Integration permissions are capability-scoped.
+- Every synchronization and external action is auditable.
+- Provider failures do not corrupt LeadOps system-of-record state.
+- Connectors can be installed and disabled without modifying the core domain.
+
+## Result
+
+Stage 11 transforms LeadOps from an autonomous internal platform into an **integration-centric LeadOps ecosystem**:
+
+```
+External Business Systems
+          ↓
+      Connectors
+          ↓
+   Canonical Events
+          ↓
+      LeadOps Core
+          ↓
+ Intelligence / Revenue / Control Plane
+          ↓
+ External Actions
+```

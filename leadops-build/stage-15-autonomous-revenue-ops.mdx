@@ -1,0 +1,719 @@
+---
+title: Stage 15 — Autonomous Revenue Operations Layer
+sidebarTitle: Stage 15 — Autonomous Revenue Ops
+description: Operational architecture for policy-governed autonomous revenue prioritization, next-best-action, routing, follow-up, forecasting, experimentation, agent coordination, escalation, and closed-loop learning.
+---
+
+# Stage 15 — Autonomous Revenue Operations Layer
+
+## 1. Purpose
+
+Stage 15 operationalizes the predictive revenue capabilities established in Stages 7–9. The goal is a **policy-governed revenue operations control loop** that continuously evaluates opportunities, selects bounded next-best-actions, routes work, coordinates agents and humans, captures outcomes, and improves future decisions without bypassing authorization, consent, suppression, audit, or tenant boundaries.
+
+```text
+Signals / Events
+      ↓
+Prediction Layer
+      ↓
+Opportunity Prioritization
+      ↓
+Next-Best-Action Engine
+      ↓
+Policy / Consent / Suppression
+      ↓
+Routing / Assignment
+      ↓
+Workflow / Agent Execution
+      ↓
+Human Escalation where required
+      ↓
+Outcome / Revenue Event
+      ↓
+Attribution + Learning Loop
+      ↺
+```
+
+The authoritative execution boundary remains:
+
+```text
+Prediction → NBA → Control Plane → Policy → Authorization → Execution → Audit
+```
+
+A model prediction is decision support, not authorization.
+
+## 2. Repository Architecture
+
+```text
+leadops/
+├── revenue-ops/
+│   ├── orchestrator/
+│   │   ├── revenue-ops-orchestrator.ts
+│   │   ├── decision-cycle.ts
+│   │   ├── priority-queue.ts
+│   │   └── conflict-manager.ts
+│   ├── opportunities/
+│   │   ├── opportunity-ranker.ts
+│   │   ├── expected-revenue.ts
+│   │   ├── freshness.ts
+│   │   └── opportunity-policy.ts
+│   ├── nba/
+│   │   ├── candidates.ts
+│   │   ├── selector.ts
+│   │   ├── scoring.ts
+│   │   ├── reason-codes.ts
+│   │   └── expiration.ts
+│   ├── routing/
+│   │   ├── routing-engine.ts
+│   │   ├── constraints.ts
+│   │   ├── fairness.ts
+│   │   └── assignment.ts
+│   ├── followups/
+│   │   ├── scheduler.ts
+│   │   ├── quiet-hours.ts
+│   │   ├── frequency-caps.ts
+│   │   └── contact-policy.ts
+│   ├── appointments/
+│   │   ├── optimizer.ts
+│   │   ├── availability.ts
+│   │   └── recommendations.ts
+│   ├── forecasting/
+│   │   ├── forecast-service.ts
+│   │   ├── scenarios.ts
+│   │   ├── calibration.ts
+│   │   └── error-tracking.ts
+│   ├── experiments/
+│   │   ├── experiment-manager.ts
+│   │   ├── assignment.ts
+│   │   ├── holdouts.ts
+│   │   └── guardrails.ts
+│   ├── agents/
+│   │   ├── coordinator.ts
+│   │   ├── task-planner.ts
+│   │   ├── locks.ts
+│   │   └── utilization.ts
+│   ├── escalation/
+│   │   ├── escalation-manager.ts
+│   │   ├── thresholds.ts
+│   │   └── human-handoff.ts
+│   ├── outcomes/
+│   │   ├── outcome-capture.ts
+│   │   ├── attribution.ts
+│   │   └── learning-loop.ts
+│   └── policies/
+│       ├── revenue-policy.ts
+│       ├── action-policy.ts
+│       └── autonomy-policy.ts
+├── api/
+│   └── revenue-ops/
+└── tests/
+    └── revenue-ops/
+```
+
+Stage 15 consumes Stage 8 prediction services and Stage 9 control-plane services; it does not create a parallel execution authority.
+
+## 3. Revenue Operations Orchestrator
+
+The orchestrator owns each revenue decision cycle:
+
+1. consume eligible signals and outcomes
+2. refresh opportunity state
+3. calculate predictive features
+4. rank opportunities
+5. generate candidate actions
+6. apply policy, consent, suppression, and capability gates
+7. resolve action conflicts
+8. route eligible work
+9. schedule or execute through Stage 12 workflows
+10. escalate actions requiring human intervention
+11. record the immutable decision
+12. capture execution and revenue outcomes
+13. publish learning events
+
+Every cycle is idempotent and restartable.
+
+```ts
+interface RevenueDecisionCycle {
+  tenantId: string;
+  cycleId: string;
+  triggeredBy: "event" | "schedule" | "manual";
+  opportunityIds: string[];
+  startedAt: string;
+  completedAt?: string;
+}
+```
+
+## 4. Opportunity Prioritization
+
+Core expected-revenue calculation:
+
+```text
+expected_revenue = deal_value × close_probability
+```
+
+A configurable priority function can incorporate freshness, contactability, SLA risk, strategic priority, and action cost:
+
+```text
+priority =
+  expected_revenue
+  × freshness_factor
+  × contactability_factor
+  × SLA_factor
+  × strategic_priority
+  ÷ action_cost
+```
+
+Coefficients are tenant-scoped configuration. Ranking must expose factor-level metadata rather than an opaque score.
+
+```json
+{
+  "opportunityId": "opp_123",
+  "expectedRevenue": 18400,
+  "priorityScore": 0.91,
+  "factors": {
+    "dealValue": 23000,
+    "closeProbability": 0.8,
+    "freshness": 0.96,
+    "contactability": 0.88,
+    "slaRisk": 0.92
+  },
+  "expiresAt": "2026-09-25T20:00:00Z"
+}
+```
+
+## 5. Next-Best-Action Engine
+
+Candidate actions:
+
+```text
+CALL
+SEND_EMAIL
+SEND_SMS
+REQUEST_ENRICHMENT
+ASSIGN_HUMAN
+SCHEDULE_FOLLOWUP
+WAIT
+SUPPRESS
+```
+
+The engine has three stages:
+
+### Candidate generation
+Generate actions supported by lead state, consent, channel availability, connector capabilities, and policy.
+
+### Candidate evaluation
+Evaluate expected revenue impact, execution probability, urgency, intent, SLA risk, contactability, channel suitability, action cost, contact history, frequency limits, and model confidence.
+
+### Candidate authorization
+Send the selected candidate through the Stage 9 policy/control plane.
+
+A high model score never authorizes an action by itself.
+
+## 6. Decision Contract
+
+```ts
+interface NBADecision {
+  id: string;
+  tenantId: string;
+  opportunityId: string;
+  candidateAction: string;
+  score: number;
+  confidence: number;
+  expectedRevenueImpact?: number;
+  reasonCodes: string[];
+  requiredCapabilities: string[];
+  policyRequirements: string[];
+  status:
+    | "PROPOSED"
+    | "APPROVED"
+    | "BLOCKED"
+    | "EXPIRED"
+    | "EXECUTED"
+    | "FAILED"
+    | "ESCALATED";
+  expiresAt: string;
+  idempotencyKey: string;
+  createdAt: string;
+}
+```
+
+Reason codes should expose observable factors such as `HIGH_INTENT`, `RECENT_PRICING_SIGNAL`, `SLA_RISK`, `HIGH_EXPECTED_REVENUE`, `CONTACTABLE`, `FOLLOWUP_DUE`, `RECENT_CONTACT`, `CONSENT_REQUIRED`, and `HUMAN_APPROVAL_REQUIRED`.
+
+Do not expose hidden chain-of-thought or internal model reasoning.
+
+## 7. Confidence and Autonomy
+
+Autonomy is policy-controlled.
+
+- **High confidence:** may auto-execute explicitly authorized low-risk actions such as internal enrichment, queue reprioritization, or approved scheduling.
+- **Medium confidence:** may require approval based on action, value, channel, or tenant policy.
+- **Low confidence:** routes to human review, enrichment, research, or WAIT.
+
+Confidence never overrides consent, suppression, authorization, or hard policy blocks.
+
+## 8. Intelligent Routing
+
+Routing can use:
+
+- territory
+- owner relationship
+- skills
+- availability
+- workload
+- SLA
+- opportunity value
+- predicted close probability
+- timezone
+- permitted language preference
+- account ownership
+- business hours
+
+Hard constraints eliminate invalid assignees. Soft constraints optimize among eligible assignees.
+
+Every routing decision records applied constraints and the selected assignment. Fairness monitoring prevents eligible queues or owners from being systematically starved.
+
+## 9. Follow-Up Scheduling
+
+Required gates:
+
+- consent where required
+- suppression status
+- channel eligibility
+- quiet hours
+- tenant business hours
+- frequency caps
+- recent-contact windows
+- workflow availability
+- recommendation expiration
+
+Lifecycle:
+
+```text
+PROPOSED → POLICY_CHECK → SCHEDULED → DUE → EXECUTING → COMPLETED
+```
+
+If opportunity state changes, pending follow-ups must be re-evaluated before execution.
+
+## 10. Appointment Optimization
+
+Recommendations can consider customer availability, owner availability, timezone, appointment type, historical show patterns, urgency, SLA, capacity, and routing constraints.
+
+The optimizer proposes slots but never bypasses calendar permissions. Recommendations retain their inputs and eventual outcomes.
+
+## 11. Forecasting
+
+Operational forecasts expose:
+
+```text
+Baseline
+Conservative
+Expected
+Upside
+```
+
+Every run records period, opportunity population, model/version, assumptions, scenario parameters, predicted revenue, realized revenue when available, calibration metrics, and forecast error.
+
+```text
+forecast_error = realized_revenue - predicted_revenue
+```
+
+Track systematic overprediction and underprediction, not only aggregate accuracy.
+
+## 12. Experimentation
+
+Experiments support approved A/B assignments, holdouts, policy variants, workflow variants, timing experiments, and permitted channel experiments.
+
+Each experiment requires:
+
+- owner
+- start/end time
+- eligible population
+- exclusions
+- assignment strategy
+- primary metric
+- guardrails
+- traffic/sample limits
+- rollback behavior
+
+Consent, suppression, communication policy, and connector permissions remain authoritative.
+
+## 13. Revenue Agent Coordination
+
+Multiple agents must not independently issue conflicting consequential actions for one opportunity.
+
+```text
+Opportunity
+   ↓
+Coordinator
+   ├── Research Agent
+   ├── Enrichment Agent
+   ├── Qualification Agent
+   ├── Scheduling Agent
+   └── Follow-Up Agent
+```
+
+The coordinator owns sequencing, priority, opportunity locks, duplicate prevention, capability checks, agent health, escalation, and cancellation when state changes.
+
+An agent recommendation becomes executable only through the Stage 9 control plane.
+
+## 14. Human Escalation
+
+Escalate when:
+
+- confidence is below policy threshold
+- expected value exceeds an approval threshold
+- policy requires approval
+- agents disagree
+- the customer requests a human
+- execution repeatedly fails
+- an unusual state is detected
+- a high-risk action is proposed
+
+Record entity, proposed action, reason, policy, requester, risk, expiration, approver, decision, timestamp, and audit reference.
+
+## 15. Closed-Loop Learning
+
+```text
+Decision
+  ↓
+Execution
+  ↓
+Customer / Revenue Outcome
+  ↓
+Attribution
+  ↓
+Model Evaluation
+  ↓
+Calibration
+  ↓
+Policy-safe Optimization
+  ↓
+Future Decisions
+```
+
+Outcome events include contact attempted, contact connected, response received, appointment booked/attended, opportunity advanced/lost, deal won, revenue recognized, suppression requested, consent changed, workflow failure, and human override.
+
+Learning may update scoring parameters and model calibration only through approved model-management processes. It must never silently mutate authorization policy.
+
+## 16. APIs
+
+```text
+GET  /revenue-ops/opportunities
+GET  /revenue-ops/nba
+POST /revenue-ops/nba/evaluate
+
+GET  /revenue-ops/routing
+POST /revenue-ops/routing/evaluate
+
+GET  /revenue-ops/followups
+POST /revenue-ops/followups/schedule
+POST /revenue-ops/followups/:id/cancel
+
+GET  /revenue-ops/appointments
+POST /revenue-ops/appointments/recommend
+
+GET  /revenue-ops/forecast
+POST /revenue-ops/forecast/run
+
+GET  /revenue-ops/experiments
+POST /revenue-ops/experiments
+POST /revenue-ops/experiments/:id/pause
+POST /revenue-ops/experiments/:id/rollback
+
+GET  /revenue-ops/agents
+GET  /revenue-ops/agents/tasks
+
+GET  /revenue-ops/outcomes
+POST /revenue-ops/outcomes
+
+GET  /revenue-ops/decisions/:id
+GET  /revenue-ops/escalations
+POST /revenue-ops/escalations/:id/approve
+POST /revenue-ops/escalations/:id/reject
+```
+
+Write endpoints must pass tenant authorization, capability checks, policy evaluation, idempotency, and audit logging.
+
+## 17. Database Model
+
+Add:
+
+```text
+revenue_opportunities
+nba_candidates
+nba_decisions
+routing_decisions
+followup_plans
+appointment_recommendations
+forecast_runs
+forecast_scenarios
+experiments
+experiment_assignments
+revenue_agent_tasks
+escalations
+outcome_events
+model_calibrations
+```
+
+Invariants:
+
+- every record carries tenant identity
+- every decision has an immutable decision ID
+- executable actions have idempotency keys
+- decisions reference model and policy versions
+- outcomes reference originating decisions when available
+- completed forecast runs are immutable
+- experiment assignments are stable for their population
+- audit references are retained for consequential actions
+
+## 18. Event Contracts
+
+```text
+revenue.opportunity_ranked
+revenue.nba_proposed
+revenue.nba_approved
+revenue.nba_blocked
+revenue.action_scheduled
+revenue.action_executed
+revenue.action_failed
+revenue.routing_completed
+revenue.appointment_recommended
+revenue.appointment_booked
+revenue.forecast_completed
+revenue.experiment_assigned
+revenue.escalation_created
+revenue.escalation_resolved
+revenue.outcome_recorded
+revenue.model_calibrated
+```
+
+Use the canonical event envelope established in Stage 13. Consumers must support replay and idempotency.
+
+## 19. Observability
+
+| Metric | Purpose |
+|---|---|
+| Action acceptance rate | Policy acceptance |
+| Approval rate | Human approval behavior |
+| Execution success rate | Operational reliability |
+| Expected vs realized revenue | Decision quality |
+| SLA attainment | Timing performance |
+| Contact rate | Reachability |
+| Appointment rate | Scheduling effectiveness |
+| Show rate | Appointment quality |
+| Close rate | Downstream conversion |
+| Cost per action | Operational efficiency |
+| Agent utilization | Agent capacity |
+| Policy block rate | Governance friction |
+| Escalation rate | Autonomy boundaries |
+| Forecast error | Forecast calibration |
+| Model calibration error | Probability reliability |
+
+Stage 14 Command Center surfaces these metrics alongside decision, policy, execution, and outcome state.
+
+## 20. Failure Handling
+
+Revenue automation fails closed for consequential actions.
+
+- Prediction outage: use configured WAIT, deterministic fallback, or human review; never invent predictions.
+- CRM outage: do not assume writes succeeded; retry idempotently and reconcile.
+- Communication outage: preserve pending state and enforce provider retry limits.
+- Calendar outage: do not claim an appointment exists.
+- Policy outage: block consequential autonomous actions unless an explicitly configured fail-safe policy permits them.
+- Agent timeout: release task leases safely and prevent duplicate execution through idempotency.
+
+## 21. Governance Guardrails
+
+Hard boundaries:
+
+- no consent bypass
+- no suppression bypass
+- no tenant isolation bypass
+- no hidden policy changes
+- no financial commitments without authorization
+- no uncontrolled outbound messaging
+- no unbounded retries
+- no autonomous alteration of authorization rules
+- no model score as sole authorization
+- no execution without capability scope
+- no irreversible action without required approval
+- no execution after recommendation expiration
+- no silent deletion of decision or audit history
+
+Kill switches exist at:
+
+```text
+Global
+Tenant
+Workflow
+Connector
+Agent
+Action Type
+Experiment
+```
+
+## 22. Conflict Resolution
+
+When multiple systems propose actions for one opportunity:
+
+```text
+1. Hard policy
+2. Consent / suppression
+3. Tenant authorization
+4. Control-plane locks
+5. Active human instruction
+6. System-of-record state
+7. Deterministic rules
+8. Verified predictive decision
+9. Agent recommendation
+10. Heuristic fallback
+```
+
+Only one consequential action should hold the execution lease unless action types are explicitly declared non-conflicting.
+
+## 23. Example Decision Flow
+
+```text
+High-intent signal
+      ↓
+Prediction updates close probability
+      ↓
+Opportunity ranker calculates expected revenue
+      ↓
+NBA proposes CALL
+      ↓
+Consent + suppression check
+      ↓
+Routing selects eligible owner
+      ↓
+Policy authorizes
+      ↓
+Control plane creates task
+      ↓
+Call executes
+      ↓
+Outcome = connected
+      ↓
+Opportunity state updates
+      ↓
+Next cycle recalculates
+      ↓
+Revenue outcome captured
+      ↓
+Attribution + calibration update
+```
+
+If policy blocks CALL, the blocked decision is retained and the next eligible action is considered; policy is never bypassed.
+
+## 24. Testing Strategy
+
+### Unit
+- expected-revenue calculation
+- ranking factors
+- candidate generation
+- NBA scoring
+- expiration
+- quiet hours
+- frequency caps
+- routing constraints
+- fairness constraints
+- forecast scenarios
+- calibration metrics
+- experiment assignment
+- escalation thresholds
+
+### Integration
+- prediction → NBA
+- NBA → policy
+- policy → control plane
+- control plane → workflow
+- workflow → connector
+- connector → outcome
+- outcome → attribution
+- attribution → calibration
+
+### Security
+- tenant isolation
+- capability enforcement
+- consent and suppression enforcement
+- authorization precedence
+- idempotency
+- replay protection
+- audit integrity
+- kill switches
+
+### Failure
+- model outage
+- CRM outage
+- communications outage
+- calendar outage
+- policy outage
+- worker crash
+- duplicate events
+- stale decisions
+- conflicting agent actions
+
+## 25. Acceptance Criteria
+
+Stage 15 is complete when:
+
+- opportunities can be ranked using inspectable factor metadata
+- NBA candidates can be generated and evaluated
+- policy and consent gates remain authoritative
+- actions expire safely
+- routing respects hard and soft constraints
+- follow-ups respect quiet hours and frequency caps
+- appointments are recommended without bypassing calendar authorization
+- forecasts are versioned and calibrated against outcomes
+- experiments have holdouts and rollback controls
+- agents coordinate without duplicate consequential actions
+- humans can approve or reject escalations
+- outcomes feed attribution and calibration
+- consequential decisions are auditable
+- operations remain tenant-isolated
+- required failure modes fail closed
+- kill switches stop autonomous execution
+- Command Center users can inspect decisions, actions, outcomes, and policy results
+
+## 26. Definition of Done
+
+The operational revenue path is now:
+
+```text
+Signal
+  → Intelligence
+  → Prediction
+  → Opportunity
+  → Next-Best-Action
+  → Policy
+  → Routing
+  → Workflow / Agent
+  → Human Escalation
+  → Execution
+  → Outcome
+  → Attribution
+  → Calibration
+  → Optimization
+```
+
+> **Autonomy increases execution speed, not authorization authority.**
+
+Stage 15 turns the earlier predictive capabilities into a production-oriented revenue operations loop while preserving Stage 9 as the control plane, Stage 12 as the workflow engine, Stage 13 as the operational command center, and Stage 14 as the production frontend.
+
+## 27. Next Stage
+
+**Stage 16 — Autonomous Optimization, Scale & Enterprise Hardening**
+
+Planned areas:
+
+- large-scale event processing
+- optimization across tenants and workspaces
+- model governance
+- advanced experimentation
+- cost optimization
+- workload elasticity
+- disaster recovery
+- enterprise SLOs
+- multi-region architecture
+- advanced audit and compliance
+- operational rollback
+- platform-wide self-healing within policy boundaries

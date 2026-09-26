@@ -1,0 +1,914 @@
+---
+title: "Stage 14 — Production Frontend Implementation & Design System"
+sidebarTitle: "Stage 14 — Production Frontend"
+description: "Production frontend architecture, design system, realtime client, operational workspaces, security, accessibility, performance, and testing."
+---
+
+# Stage 14 — Production Frontend Implementation & Design System
+
+Stage 14 converts the Stage 13 Command Center architecture into a production frontend implementation plan. The objective is to establish the actual application shell, routing, component system, server-state integration, realtime client, workspace surfaces, accessibility foundation, and test strategy.
+
+## 1. Implementation Objective
+
+The frontend is organized as a thin operational client over the LeadOps BFF and control plane.
+
+```text
+Browser
+  ↓
+Web Application
+  ├── App Shell
+  ├── Workspace Router
+  ├── Design System
+  ├── Server State
+  ├── Realtime Client
+  └── Feature Modules
+          ↓
+       BFF/API
+          ↓
+   LeadOps Control Plane
+          ↓
+ Intelligence / Revenue / Workflow / Agent / Integration Services
+```
+
+The frontend does not implement authorization, policy, workflow execution, or business-critical state transitions locally.
+
+---
+
+## 2. Recommended Frontend Stack
+
+The implementation should use a typed React/TypeScript application with:
+
+- React
+- TypeScript
+- App-router capable routing
+- Server-state query/cache layer
+- Schema validation at API boundaries
+- Accessible component primitives
+- WebSocket/SSE realtime transport
+- E2E browser testing
+- Unit/component testing
+- Strict TypeScript configuration
+
+The exact framework can remain replaceable. Domain features should not depend directly on framework-specific APIs.
+
+---
+
+## 3. Production Repository Structure
+
+```text
+apps/
+└── web/
+    ├── app/
+    │   ├── (authenticated)/
+    │   │   ├── command-center/
+    │   │   ├── leads/
+    │   │   ├── opportunities/
+    │   │   ├── workflows/
+    │   │   ├── agents/
+    │   │   ├── approvals/
+    │   │   ├── integrations/
+    │   │   ├── revenue/
+    │   │   └── admin/
+    │   ├── login/
+    │   ├── error/
+    │   └── not-found/
+    │
+    ├── components/
+    │   ├── ui/
+    │   ├── shell/
+    │   ├── navigation/
+    │   ├── command/
+    │   ├── search/
+    │   ├── tables/
+    │   ├── forms/
+    │   ├── charts/
+    │   ├── timeline/
+    │   ├── drawers/
+    │   ├── dialogs/
+    │   ├── status/
+    │   └── accessibility/
+    │
+    ├── features/
+    │   ├── command-center/
+    │   ├── pipeline/
+    │   ├── leads/
+    │   ├── intelligence/
+    │   ├── automation/
+    │   ├── revenue/
+    │   ├── agents/
+    │   ├── approvals/
+    │   ├── integrations/
+    │   └── audit/
+    │
+    ├── api/
+    │   ├── client.ts
+    │   ├── errors.ts
+    │   ├── schemas/
+    │   └── endpoints/
+    │
+    ├── realtime/
+    │   ├── client.ts
+    │   ├── protocol.ts
+    │   ├── event-store.ts
+    │   ├── subscriptions.ts
+    │   ├── reconnect.ts
+    │   └── cursor-store.ts
+    │
+    ├── state/
+    │   ├── server/
+    │   ├── ui/
+    │   └── permissions/
+    │
+    ├── design-system/
+    │   ├── tokens/
+    │   ├── themes/
+    │   ├── primitives/
+    │   └── patterns/
+    │
+    ├── hooks/
+    ├── lib/
+    ├── config/
+    ├── types/
+    └── tests/
+        ├── unit/
+        ├── component/
+        ├── integration/
+        ├── accessibility/
+        └── e2e/
+```
+
+---
+
+## 4. Application Shell
+
+The first implementation milestone is the shell because every workspace depends on it.
+
+Required shell components:
+
+```text
+<AppShell>
+  <GlobalHeader />
+  <WorkspaceNavigation />
+  <CommandBar />
+  <WorkspaceViewport>
+    <WorkspaceToolbar />
+    <WorkspaceContent />
+    <ContextDrawer />
+  </WorkspaceViewport>
+  <SystemStatusBar />
+</AppShell>
+```
+
+The shell owns:
+
+- Authentication state
+- Current tenant
+- Current workspace
+- Navigation permissions
+- Global search
+- Command palette
+- Notifications
+- Approval count
+- Connection status
+- User preferences
+
+It should not own domain business logic.
+
+---
+
+## 5. Workspace Routing
+
+Use URL-addressable routes so operational state can be shared and bookmarked.
+
+Example:
+
+```text
+/command-center
+/leads
+/leads/:leadId
+/opportunities
+/opportunities/:opportunityId
+/workflows
+/workflows/:workflowId
+/workflows/:workflowId/executions/:executionId
+/agents
+/agents/:agentId
+/approvals
+/integrations
+/integrations/:integrationId
+/revenue
+/admin/audit
+```
+
+Filters should be serializable where practical:
+
+```text
+/leads?status=qualified&owner=me&sort=score_desc
+```
+
+Deep links must reproduce the same authorized view without depending on client-local memory.
+
+---
+
+## 6. Design System
+
+Create a small internal design system before feature screens multiply.
+
+### Primitive Components
+
+- Button
+- IconButton
+- Input
+- Select
+- Combobox
+- Checkbox
+- Radio
+- Switch
+- Badge
+- Tooltip
+- Tabs
+- Card
+- Dialog
+- Drawer
+- Dropdown
+- Menu
+- Popover
+- Table
+- Pagination
+- EmptyState
+- Skeleton
+- Toast
+- Alert
+- Timeline
+
+### Operational Patterns
+
+- KPI card
+- Status indicator
+- Entity header
+- Filter bar
+- Saved-view selector
+- Activity timeline
+- Execution node
+- Agent status card
+- Integration health card
+- Approval card
+- Command result
+- Entity drawer
+
+Feature pages should compose these patterns rather than inventing custom versions.
+
+---
+
+## 7. Theme and Density
+
+Support:
+
+- Light
+- Dark
+- System
+
+Density modes:
+
+```text
+COMPACT
+STANDARD
+COMFORTABLE
+```
+
+Density must affect spacing, table row height, card padding, and navigation—not typography readability.
+
+All visual tokens should be centralized:
+
+```ts
+export const tokens = {
+  spacing: {},
+  typography: {},
+  radii: {},
+  shadows: {},
+  motion: {},
+  breakpoints: {},
+  zIndex: {},
+};
+```
+
+Avoid hard-coded colors throughout feature components.
+
+---
+
+## 8. API Client
+
+All BFF calls should pass through a typed API client.
+
+Example contract:
+
+```ts
+interface ApiClient {
+  get<T>(path: string, options?: RequestOptions): Promise<T>;
+  post<T>(path: string, body?: unknown): Promise<T>;
+  put<T>(path: string, body?: unknown): Promise<T>;
+  delete<T>(path: string): Promise<T>;
+}
+```
+
+API responses should be validated at the boundary.
+
+```text
+HTTP response
+    ↓
+Schema validation
+    ↓
+Canonical frontend type
+    ↓
+Server-state cache
+    ↓
+Feature component
+```
+
+A malformed response should produce a controlled error rather than silently corrupting UI state.
+
+---
+
+## 9. Server State
+
+Domain records should live in the server-state layer.
+
+Examples:
+
+- leads
+- opportunities
+- workflows
+- workflow executions
+- agents
+- approvals
+- integrations
+- revenue summaries
+
+Required behaviors:
+
+- Cache
+- Deduplication
+- Refetch
+- Invalidations
+- Pagination
+- Optimistic updates only where safe
+- Error recovery
+- Loading states
+- Stale-state indicators
+
+Mutations that have policy or financial consequences must use server-authoritative responses rather than assuming the requested state change succeeded.
+
+---
+
+## 10. Realtime Client
+
+Implement a reusable realtime transport.
+
+```ts
+interface RealtimeClient {
+  connect(): Promise<void>;
+  disconnect(): void;
+  subscribe(filter: EventSubscription): Unsubscribe;
+  acknowledge(sequence: number): void;
+  recover(cursor: string): Promise<void>;
+}
+```
+
+Event processing:
+
+```text
+CONNECT
+  ↓
+AUTHENTICATE
+  ↓
+SUBSCRIBE
+  ↓
+RECEIVE EVENT
+  ↓
+CHECK TENANT / PERMISSION
+  ↓
+CHECK SEQUENCE
+  ├── expected → APPLY
+  ├── duplicate → IGNORE
+  └── gap → RECOVER
+  ↓
+INVALIDATE / PATCH CACHE
+  ↓
+RENDER
+```
+
+The event stream must not directly mutate arbitrary React component state.
+
+---
+
+## 11. Command Center Implementation
+
+The initial Command Center should contain:
+
+### KPI strip
+
+- Pipeline value
+- Expected revenue
+- Qualified opportunities
+- Appointments
+- Active workflows
+- Pending approvals
+- Agent tasks
+- Integration incidents
+
+### Main panels
+
+- Opportunity queue
+- Revenue/funnel summary
+- Workflow execution activity
+- Agent activity
+- Approval queue
+- Integration health
+- Live event stream
+
+Panels should be independently collapsible.
+
+---
+
+## 12. Lead 360 Implementation
+
+The lead detail screen should use a persistent entity header and tabbed content.
+
+```text
+Lead Header
+├── Overview
+├── Signals
+├── Qualification
+├── Communications
+├── Appointments
+├── Workflows
+├── Revenue
+└── Timeline
+```
+
+Primary actions should include only actions authorized for the current user and lead state.
+
+Before communication or other consequential action:
+
+```UI ACTION
+   ↓
+API REQUEST
+   ↓
+AUTHORIZATION
+   ↓
+CONSENT / SUPPRESSION
+   ↓
+POLICY
+   ↓
+EXECUTION OR APPROVAL
+```
+
+---
+
+## 13. Pipeline Implementation
+
+Support both table and board representations over the same query model.
+
+```text
+PipelineQuery
+├── filters
+├── search
+├── owner
+├── territory
+├── stage
+├── scoreRange
+├── valueRange
+├── freshness
+├── sort
+└── cursor
+```
+
+Do not maintain independent business logic for table and Kanban views.
+
+Both consume the same canonical query and record model.
+
+---
+
+## 14. Workflow Execution Inspector
+
+The execution inspector is one of the highest-value operational screens.
+
+```text
+Execution
+├── Summary
+├── Trigger
+├── Context
+├── Node Timeline
+├── Policies
+├── Approvals
+├── Retries
+├── Connector Activity
+├── Errors
+└── Audit
+```
+
+Node visualization:
+
+```text
+[Trigger] → [Enrich] → [Score] → [Policy]
+                                  │
+                           ┌──────┴──────┐
+                           ↓             ↓
+                       [Approve]      [Block]
+                           ↓
+                       [Execute]
+```
+
+Operators must be able to identify exactly where execution stopped and why, subject to permissions.
+
+---
+
+## 15. Agent Operations UI
+
+Agent detail:
+
+```text
+Agent
+├── Status
+├── Version
+├── Capabilities
+├── Permissions
+├── Current Task
+├── Recent Tasks
+├── Success / Failure
+├── Latency
+├── Cost
+└── Audit
+```
+
+Actions such as disabling an agent or changing capabilities must be routed through administrative authorization and audit.
+
+---
+
+## 16. Approval Center Implementation
+
+Approval cards should make the proposed action understandable without exposing unnecessary internal reasoning.
+
+Display:
+
+- What will happen
+- Which entity is affected
+- Which workflow/agent requested it
+- Applicable policy
+- Risk category
+- Expiration
+- Available decisions
+
+Approval mutation flow:
+
+```APPROVE / REJECT
+       ↓
+BFF
+       ↓
+AUTHORIZATION
+       ↓
+CONTROL PLANE
+       ↓
+POLICY RECHECK
+       ↓
+STATE TRANSITION
+       ↓
+AUDIT EVENT
+       ↓
+REALTIME UPDATE
+```
+
+The policy must be rechecked because conditions may have changed since the approval was displayed.
+
+---
+
+## 17. Integration Health UI
+
+Each integration should expose:
+
+```text
+Connection
+Authentication
+Capabilities
+Permissions
+Last Sync
+Sync Lag
+Webhooks
+Rate Limits
+Mappings
+Errors
+Recent Events
+```
+
+Credential values are never rendered.
+
+Provider errors should be normalized into operator-readable categories while preserving provider-specific diagnostics behind appropriate permissions.
+
+---
+
+## 18. Global Search
+
+Search should provide grouped results:
+
+```text
+LEADS
+OPPORTUNITIES
+ACCOUNTS
+WORKFLOWS
+EXECUTIONS
+AGENTS
+INTEGRATIONS
+APPROVALS
+EVENTS
+```
+
+Keyboard flow:
+
+```Ctrl/Cmd + K
+      ↓
+Search
+      ↓
+Arrow Keys
+      ↓
+Enter
+      ↓
+Deep Link
+```
+
+Search must respect tenant boundaries and authorization filters.
+
+---
+
+## 19. Error and Loading Architecture
+
+Every workspace needs explicit:
+
+- Loading state
+- Empty state
+- Permission denied state
+- Not found state
+- Validation error
+- API failure
+- Realtime disconnected state
+- Stale data state
+
+Do not render a blank panel when a request fails.
+
+Example:
+
+```text
+REALTIME DISCONNECTED
+Last synchronized: 06:24:17
+[Reconnect]
+```
+
+The UI should remain useful when realtime is unavailable by falling back to normal API refresh.
+
+---
+
+## 20. Accessibility Implementation
+
+Minimum requirements:
+
+- Full keyboard navigation
+- Visible focus indicators
+- Semantic headings
+- Accessible labels
+- Dialog focus trapping
+- Drawer focus restoration
+- Screen-reader status announcements
+- Accessible table navigation
+- Keyboard alternative to drag/drop
+- Reduced-motion support
+
+Automated accessibility tests should run in CI.
+
+---
+
+## 21. Testing Strategy
+
+### Unit
+
+Test:
+
+- Query builders
+- Formatters
+- Permission helpers
+- Event reducers
+- Cursor handling
+- Mapping functions
+- State selectors
+
+### Component
+
+Test:
+
+- Loading states
+- Empty states
+- Permission states
+- Dialogs
+- Drawers
+- Tables
+- Filters
+- Command palette
+- Timeline
+
+### Integration
+
+Test:
+
+- API client
+- Authentication
+- Server-state cache
+- Realtime events
+- Event recovery
+- Mutation invalidation
+
+### E2E
+
+Primary flows:
+
+1. Login
+2. Select workspace
+3. Search lead
+4. Open Lead 360
+5. Inspect opportunity
+6. Review workflow execution
+7. Review approval
+8. Approve/reject permitted action
+9. Inspect agent
+10. Inspect integration
+11. Navigate to audit
+12. Recover from realtime disconnect
+
+---
+
+## 22. Performance Budgets
+
+Establish measurable frontend budgets.
+
+Track:
+
+- Initial route load
+- JavaScript payload
+- Largest contentful paint
+- Interaction latency
+- Search response latency
+- Table render time
+- Realtime event processing time
+- Memory growth during long sessions
+
+Large datasets must use virtualization or pagination.
+
+Avoid rendering complete histories when only the visible range is needed.
+
+---
+
+## 23. CI Quality Gates
+
+Frontend CI should run:
+
+```text
+Install
+  ↓
+Type Check
+  ↓
+Lint
+  ↓
+Unit Tests
+  ↓
+Component Tests
+  ↓
+Accessibility Tests
+  ↓
+Production Build
+  ↓
+E2E Tests
+  ↓
+Artifact / Deployment
+```
+
+A production build should fail on TypeScript errors, lint violations classified as blocking, failing tests, or inaccessible critical workflows.
+
+---
+
+## 24. Security Acceptance Tests
+
+The frontend implementation is not complete until these scenarios are covered:
+
+- Unauthorized route access is rejected.
+- Unauthorized actions cannot be invoked through direct API calls.
+- Tenant A data never appears in Tenant B queries.
+- Credentials never appear in browser-rendered payloads.
+- Sensitive fields are redacted.
+- Approval actions are re-authorized.
+- Policy-sensitive actions cannot bypass the control plane.
+- Expired sessions are handled cleanly.
+- Realtime events are tenant-scoped.
+- Audit events are generated for privileged actions.
+
+---
+
+## 25. Stage 14 Milestones
+
+### Milestone 14.1 — Foundation
+
+- Application shell
+- Routing
+- Authentication integration
+- Tenant context
+- Design tokens
+- UI primitives
+
+### Milestone 14.2 — Data Layer
+
+- API client
+- Schemas
+- Server-state layer
+- Error model
+- Query utilities
+
+### Milestone 14.3 — Realtime
+
+- WebSocket/SSE client
+- Event envelope
+- Cursor recovery
+- Cache invalidation
+- Connection status
+
+### Milestone 14.4 — Core Workspaces
+
+- Command Center
+- Leads
+- Opportunities
+- Revenue
+- Search
+
+### Milestone 14.5 — Operations
+
+- Workflows
+- Execution inspector
+- Agents
+- Approvals
+- Integrations
+- Audit
+
+### Milestone 14.6 — Hardening
+
+- Accessibility
+- Performance
+- Security tests
+- E2E coverage
+- Production build
+- Deployment verification
+
+---
+
+## 26. Definition of Done
+
+Stage 14 is complete when the LeadOps frontend is no longer a conceptual dashboard.
+
+It must provide:
+
+- Real route-addressable workspaces
+- Shared production design system
+- Typed API integration
+- Authoritative server state
+- Realtime event handling
+- Lead 360
+- Pipeline
+- Workflow execution inspection
+- Agent operations
+- Approval management
+- Integration health
+- Revenue views
+- Search and command palette
+- Permission-aware navigation
+- Accessibility coverage
+- E2E coverage
+- CI quality gates
+- Production build verification
+
+The frontend remains deliberately separated from the execution authority:
+
+```text
+FRONTEND
+  ↓
+BFF
+  ↓
+CONTROL PLANE
+  ↓
+POLICY
+  ↓
+EXECUTION
+  ↓
+AUDIT
+```
+
+This boundary prevents the browser from becoming an unauthorized execution engine.
+
+## Next Build Boundary
+
+**Stage 15 — Autonomous Revenue Operations Layer**
+
+Stage 15 should connect the operational UI to the predictive and autonomous capabilities from Stages 7–9: next-best-action orchestration, opportunity prioritization, intelligent routing, autonomous follow-up scheduling, revenue forecasting, experimentation, agent coordination, confidence thresholds, human escalation, and closed-loop optimization.

@@ -1,0 +1,610 @@
+---
+title: "Stage 12 — Integration Marketplace & Workflow Automation"
+sidebarTitle: "Stage 12 — Workflow Automation"
+description: "Visual integration marketplace and policy-governed workflow automation architecture for LeadOps."
+---
+
+# Stage 12 — Integration Marketplace & Workflow Automation
+
+Stage 12 turns the connector layer from Stage 11 into a visual, extensible automation system. Users can install integrations, map data, define triggers, compose actions, invoke agents, enforce policies, and observe every execution without coupling the core LeadOps domain to a specific provider.
+
+## System architecture
+
+```
+                    INTEGRATION MARKETPLACE
+                             │
+                     Connector Registry
+                             │
+                ┌────────────┴────────────┐
+                ▼                         ▼
+          Installed Apps             Data Mapping
+                │                         │
+                └────────────┬────────────┘
+                             ▼
+                     EVENT / TRIGGER BUS
+                             │
+                             ▼
+                     WORKFLOW ENGINE
+                             │
+          ┌──────────────────┼──────────────────┐
+          ▼                  ▼                  ▼
+       Trigger              Agent              Action
+          │                  │                  │
+          └──────────────────┼──────────────────┘
+                             ▼
+                       POLICY GATE
+                             │
+                 ┌───────────┼───────────┐
+                 ▼           ▼           ▼
+               Allow       Approve      Block
+                 │           │
+                 └─────┬─────┘
+                       ▼
+                    EXECUTION
+                       │
+                       ▼
+                AUDIT + METRICS
+                       │
+                       ▼
+                 LEARNING LOOP
+```
+
+## Repository additions
+
+```
+leadops/
+├── marketplace/
+│   ├── catalog/
+│   │   ├── connector-catalog.ts
+│   │   ├── connector-manifest.ts
+│   │   └── categories.ts
+│   ├── installation/
+│   │   ├── installer.ts
+│   │   ├── lifecycle.ts
+│   │   └── permissions.ts
+│   └── validation/
+│       ├── manifest-validator.ts
+│       └── compatibility.ts
+├── workflow-builder/
+│   ├── definitions/
+│   │   ├── workflow-definition.ts
+│   │   ├── node-definition.ts
+│   │   └── edge-definition.ts
+│   ├── compiler/
+│   │   ├── compiler.ts
+│   │   ├── validator.ts
+│   │   └── dependency-checker.ts
+│   ├── runtime/
+│   │   ├── workflow-runtime.ts
+│   │   ├── execution-context.ts
+│   │   ├── node-runner.ts
+│   │   └── recovery.ts
+│   └── templates/
+├── triggers/
+│   ├── event-trigger.ts
+│   ├── schedule-trigger.ts
+│   ├── webhook-trigger.ts
+│   └── condition-trigger.ts
+├── actions/
+│   ├── connector-action.ts
+│   ├── agent-action.ts
+│   ├── transform-action.ts
+│   ├── notification-action.ts
+│   └── approval-action.ts
+├── mappings/
+│   ├── field-mapping.ts
+│   ├── transformer.ts
+│   ├── validation.ts
+│   └── schemas/
+├── automation/
+│   ├── scheduler.ts
+│   ├── concurrency.ts
+│   ├── deduplication.ts
+│   └── idempotency.ts
+└── tests/
+    ├── marketplace/
+    └── workflows/
+```
+
+## Connector marketplace
+
+Each connector is represented by a versioned manifest.
+
+```ts
+export interface ConnectorManifest {
+  id: string;
+  name: string;
+  version: string;
+
+  category:
+    | "crm"
+    | "marketing"
+    | "communications"
+    | "calendar"
+    | "payments"
+    | "analytics"
+    | "enrichment";
+
+  capabilities: string[];
+  requiredScopes: string[];
+
+  supports: {
+    inboundEvents: boolean;
+    outboundActions: boolean;
+    synchronization: boolean;
+  };
+}
+```
+
+The marketplace must validate the manifest before installation.
+
+## Connector installation lifecycle
+
+```
+CATALOG
+  ↓
+INSTALL_REQUESTED
+  ↓
+COMPATIBILITY_CHECK
+  ↓
+PERMISSION_REVIEW
+  ↓
+AUTHENTICATION
+  ↓
+CONNECTION_TEST
+  ↓
+INITIAL_SYNC
+  ↓
+ACTIVE
+```
+
+Failures transition to an explicit state instead of silently retrying forever:
+
+```
+AUTH_REQUIRED
+RATE_LIMITED
+PROVIDER_ERROR
+CONFIGURATION_ERROR
+DISABLED
+```
+
+## Visual workflow model
+
+A workflow is a directed graph:
+
+```
+Trigger
+  │
+  ▼
+Condition
+  │
+  ├─────────────── false ──→ End
+  │
+  ▼ true
+Enrichment
+  │
+  ▼
+AI Qualification
+  │
+  ▼
+Policy Gate
+  │
+  ├────────────── blocked ──→ Audit
+  │
+  ├────────────── approval ─→ Approval Queue
+  │
+  ▼ allowed
+CRM Update
+  │
+  ▼
+Communication
+  │
+  ▼
+Appointment / Follow-up
+```
+
+## Workflow definition
+
+```ts
+interface WorkflowDefinition {
+  id: string;
+  tenantId: string;
+
+  name: string;
+  version: number;
+
+  status: "draft" | "active" | "paused" | "archived";
+
+  trigger: WorkflowNode;
+
+  nodes: WorkflowNode[];
+  edges: WorkflowEdge[];
+
+  policyProfile: string;
+
+  createdAt: string;
+  updatedAt: string;
+}
+```
+
+## Node types
+
+### Triggers
+
+- Lead created
+- Signal received
+- Form submitted
+- Webhook received
+- Appointment created
+- Appointment missed
+- Payment received
+- Scheduled time
+- Condition became true
+
+### Actions
+
+- Create/update CRM record
+- Send email
+- Send SMS
+- Initiate approved voice action
+- Create calendar event
+- Request enrichment
+- Run AI research
+- Run qualification
+- Calculate prediction
+- Assign owner
+- Create task
+- Request human approval
+- Send notification
+
+### Logic
+
+- Condition
+- Branch
+- Delay
+- Loop with explicit bounds
+- Parallel execution
+- Join
+- Rate-limit
+- Deduplicate
+- Stop
+
+## Workflow compiler
+
+The visual workflow should not execute directly from UI state.
+
+Use:
+
+```
+Visual Definition
+      ↓
+Schema Validation
+      ↓
+Graph Validation
+      ↓
+Permission Validation
+      ↓
+Dependency Validation
+      ↓
+Policy Validation
+      ↓
+Compiled Workflow
+      ↓
+Runtime
+```
+
+The compiler should reject:
+
+- Cycles that are not explicitly bounded
+- Missing trigger nodes
+- Unreachable required nodes
+- Invalid connector capabilities
+- Missing permissions
+- Unsupported provider operations
+- Unbounded loops
+- Missing policy profiles
+- Invalid field mappings
+
+## Field mapping engine
+
+Providers use different schemas. The mapping layer translates them into canonical LeadOps fields.
+
+```text
+Provider Field
+      ↓
+Mapping Rule
+      ↓
+Transformer
+      ↓
+Validation
+      ↓
+Canonical Field
+```
+
+Example:
+
+```yaml
+mapping:
+  source: crm.contact.mobilePhone
+  destination: lead.phone
+  transform: normalizeE164
+  required: false
+```
+
+Transformers should be deterministic and testable.
+
+## Workflow runtime
+
+Every execution receives an immutable execution context:
+
+```ts
+interface ExecutionContext {
+  executionId: string;
+  workflowId: string;
+  workflowVersion: number;
+  tenantId: string;
+
+  actor: {
+    type: "user" | "agent" | "system";
+    id: string;
+  };
+
+  input: unknown;
+
+  correlationId: string;
+  causationId?: string;
+}
+```
+
+The runtime records each node execution.
+
+```text
+RUNNING
+  ↓
+SUCCEEDED
+FAILED
+WAITING
+BLOCKED
+SKIPPED
+CANCELLED
+```
+
+## Autonomous agent integration
+
+Agents become workflow nodes rather than uncontrolled background processes.
+
+```
+Workflow
+   ↓
+Agent Node
+   ↓
+Agent Task
+   ↓
+Control Plane
+   ↓
+Policy
+   ↓
+Agent Execution
+   ↓
+Structured Result
+   ↓
+Workflow
+```
+
+This preserves Stage 9's rule that the control plane owns permissions, task state, and policy.
+
+## Human approval node
+
+High-impact workflows can pause for approval:
+
+```
+ACTION REQUESTED
+      ↓
+POLICY EVALUATION
+      ↓
+APPROVAL REQUIRED
+      ↓
+HUMAN REVIEW
+   ↙       ↘
+APPROVE    REJECT
+   ↓          ↓
+EXECUTE      STOP
+```
+
+Approval records must contain:
+
+- Tenant
+- Workflow
+- Execution
+- Requested action
+- Reason
+- Policy decision
+- Requesting actor
+- Reviewer
+- Decision
+- Timestamp
+- Expiration
+
+## API surface
+
+```text
+GET  /marketplace/connectors
+GET  /marketplace/connectors/:id
+POST /marketplace/installations
+POST /marketplace/installations/:id/test
+DELETE /marketplace/installations/:id
+
+GET  /workflows
+POST /workflows
+GET  /workflows/:id
+PUT  /workflows/:id
+POST /workflows/:id/validate
+POST /workflows/:id/publish
+POST /workflows/:id/pause
+POST /workflows/:id/resume
+POST /workflows/:id/duplicate
+
+GET  /workflows/:id/executions
+GET  /workflow-executions/:id
+POST /workflow-executions/:id/cancel
+
+GET  /workflow-templates
+POST /workflow-templates/:id/instantiate
+
+GET  /mappings
+POST /mappings/validate
+
+GET  /approvals
+POST /approvals/:id/approve
+POST /approvals/:id/reject
+```
+
+## Database model
+
+Core tables:
+
+```text
+connectors
+connector_installations
+connector_permissions
+connector_credentials
+workflow_definitions
+workflow_versions
+workflow_nodes
+workflow_edges
+workflow_executions
+workflow_node_executions
+workflow_mappings
+workflow_approvals
+workflow_schedules
+```
+
+Tenant isolation remains mandatory on every tenant-owned record.
+
+## Observability
+
+The workflow dashboard should expose:
+
+```text
+ACTIVE WORKFLOWS
+RUNNING EXECUTIONS
+FAILED EXECUTIONS
+WAITING APPROVALS
+CONNECTOR HEALTH
+QUEUE DEPTH
+AVERAGE EXECUTION TIME
+SUCCESS RATE
+POLICY BLOCKS
+AGENT TASKS
+```
+
+Execution traces should make it possible to answer:
+
+1. What triggered this workflow?
+2. Which version executed?
+3. Which connector was called?
+4. Which agent participated?
+5. What policy decision occurred?
+6. What external action occurred?
+7. What was the result?
+8. What happened afterward?
+
+## Example LeadOps automation
+
+```
+NEW HIGH-VALUE SIGNAL
+        ↓
+Create Opportunity
+        ↓
+Enrich Entity
+        ↓
+Predict Revenue
+        ↓
+Evaluate Policy
+        ↓
+      ┌─┴─────────────┐
+      │               │
+    Block           Allow
+      │               │
+    Audit       Assign Owner
+                      ↓
+                 Create Task
+                      ↓
+              Request Outreach
+                      ↓
+              Wait for Response
+                      ↓
+             Conversation Event
+                      ↓
+               Qualification
+                      ↓
+              Appointment Flow
+```
+
+## Safety boundaries
+
+The workflow engine must not become a mechanism for bypassing platform safeguards.
+
+Required controls:
+
+- Consent checks
+- Suppression checks
+- Tenant authorization
+- Connector permissions
+- Frequency limits
+- Rate limits
+- Approval policies
+- Idempotency
+- Audit logging
+- Kill switches
+- Workflow versioning
+- Explicit bounded loops
+- Provider failure isolation
+
+## Stage 12 acceptance criteria
+
+- Connectors can be installed and managed through the marketplace.
+- Connector capabilities are discoverable.
+- Workflow definitions are versioned.
+- Visual workflows compile into validated executable graphs.
+- Invalid graphs cannot be published.
+- Field mappings are validated before execution.
+- Agent actions execute through the control plane.
+- High-impact actions can require human approval.
+- Workflow executions are idempotent.
+- Retries are bounded and observable.
+- Every execution has an audit trail.
+- Tenant isolation is preserved.
+- Connector failures do not corrupt authoritative LeadOps state.
+- Published workflows can be paused or disabled.
+- Workflow execution can be inspected node-by-node.
+
+## Stage 12 result
+
+The architecture now becomes:
+
+```
+                    LEADOPS
+                       │
+       ┌───────────────┼────────────────┐
+       ▼               ▼                ▼
+ Intelligence     Control Plane      Revenue
+       │               │                │
+       └───────────────┼────────────────┘
+                       ▼
+                Workflow Engine
+                       │
+              ┌────────┼────────┐
+              ▼        ▼        ▼
+           Agents   Connectors  Human
+                       │       Approval
+                       ▼
+                External Systems
+                       │
+                       ▼
+                 Events / Data
+                       │
+                       └────→ LEADOPS
+```
+
+The next boundary is **Stage 13 — Visual LeadOps Command Center**, where the marketplace, workflow builder, intelligence, revenue, agents, approvals, integrations, and live execution telemetry become one operational interface.
