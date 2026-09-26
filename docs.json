@@ -35,7 +35,8 @@
               "leadops-build/stage-12-workflow-automation",
               "leadops-build/stage-13-command-center",
               "leadops-build/stage-14-production-frontend",
-              "leadops-build/stage-15-autonomous-revenue-ops"
+              "leadops-build/stage-15-autonomous-revenue-ops",
+              "leadops-build/stage-16-enterprise-hardening"
             ]
           }
         ]
