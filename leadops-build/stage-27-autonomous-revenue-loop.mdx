@@ -1,0 +1,32 @@
+---
+title: "Stage 27 — End-to-End Autonomous Revenue Loop"
+sidebarTitle: "Stage 27 — Autonomous Revenue Loop"
+description: "End-to-end signal, prediction, NBA, routing, execution, outcome, attribution, and learning loop."
+---
+
+# Stage 27 — End-to-End Autonomous Revenue Loop
+
+The production revenue loop becomes:
+
+```text
+Signal → Enrich → Score → Predict → Prioritize → NBA → Policy → Route → Execute → Outcome → Revenue → Attribution → Learning
+```
+
+## Required measurements
+- signal-to-qualified-lead rate
+- qualification-to-appointment rate
+- appointment show rate
+- opportunity conversion
+- close rate
+- revenue per lead
+- cost per qualified lead
+- cost per appointment
+- expected vs realized revenue
+- response latency
+- workflow/agent cost
+
+## Learning
+Capture prediction, decision, action, outcome, attribution, and calibration records. Model updates are versioned. Learning cannot modify authorization, consent, suppression, security, tenant isolation, or financial policy.
+
+## Experimentation
+Support controlled experiments with explicit cohorts, exposure logging, guardrails, stopping rules, attribution, and rollback.

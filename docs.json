@@ -9,15 +9,6 @@
   },
   "favicon": "/favicon.svg",
   "navigation": {
-    "pages": [
-      {
-        "group": "Getting Started",
-        "pages": [
-          "index",
-          "quickstart"
-        ]
-      }
-    ],
     "global": {
       "anchors": [
         {
@@ -31,7 +22,41 @@
           "icon": "newspaper"
         }
       ]
-    }
+    },
+    "tabs": [
+      {
+        "tab": "LeadOps Build",
+        "groups": [
+          {
+            "group": "Build Stages",
+            "pages": [
+              "leadops-build/conversation",
+              "leadops-build/stage-11-enterprise-integrations",
+              "leadops-build/stage-12-workflow-automation",
+              "leadops-build/stage-13-command-center",
+              "leadops-build/stage-14-production-frontend",
+              "leadops-build/stage-15-autonomous-revenue-ops",
+              "leadops-build/stage-16-enterprise-hardening",
+              "leadops-build/stage-17-commercial-productization",
+              "leadops-build/stage-18-production-launch-growth",
+              "leadops-build/stage-19-global-platform-intelligence",
+              "leadops-build/stage-20-global-autonomous-control",
+              "leadops-build/stage-21-implementation-foundation",
+              "leadops-build/stage-22-data-event-fabric",
+              "leadops-build/stage-23-backend-services",
+              "leadops-build/stage-24-workers-agent-runtime",
+              "leadops-build/stage-25-command-center",
+              "leadops-build/stage-26-real-integrations",
+              "leadops-build/stage-27-autonomous-revenue-loop",
+              "leadops-build/stage-28-security-failure-engineering",
+              "leadops-build/stage-29-infrastructure-deployment",
+              "leadops-build/stage-31-growth-optimization",
+              "leadops-build/stage-30-production-launch"
+            ]
+          }
+        ]
+      }
+    ]
   },
   "logo": {
     "light": "/logo/light.svg",

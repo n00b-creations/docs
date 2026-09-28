@@ -1,0 +1,570 @@
+---
+title: "Stage 17 — Commercial Productization & Production Launch"
+sidebarTitle: "Stage 17 — Commercial Productization"
+description: "Commercial SaaS architecture for product packaging, tenant provisioning, entitlements, usage metering, billing, onboarding, marketplace operations, customer success, support, and production go-live."
+---
+
+# Stage 17 — Commercial Productization & Production Launch
+
+## Purpose
+
+Stage 17 converts the hardened LeadOps platform into a deployable, commercially packaged multi-tenant product.
+
+Stages 1–16 established intelligence, automation, integrations, the Command Center, revenue autonomy, scale, resilience, governance, and operational hardening.
+
+Stage 17 adds the commercial control plane:
+
+~~~text
+Enterprise LeadOps Platform
+        ↓
+Product Catalog
+        ↓
+Tenant Provisioning
+        ↓
+Plans / Entitlements
+        ↓
+Usage Metering
+        ↓
+Billing
+        ↓
+Customer Onboarding
+        ↓
+Marketplace
+        ↓
+Enterprise Administration
+        ↓
+Support / Success Operations
+        ↓
+Production Launch
+~~~
+
+> **Core principle: commercialization changes packaging and access, not security authority.**
+
+## 1. Product Architecture
+
+Stage 17 introduces six commercial planes:
+
+1. **Product Plane** — products, packages, plans, features, editions.
+2. **Tenant Plane** — organizations, workspaces, users, provisioning, lifecycle.
+3. **Commercial Plane** — subscriptions, contracts, invoices, credits, usage.
+4. **Entitlement Plane** — feature and capacity authorization.
+5. **Customer Operations Plane** — onboarding, support, success, health.
+6. **Marketplace Plane** — integrations, workflow templates, agent capabilities, extensions.
+
+~~~text
+                    Product Catalog
+                          ↓
+                  Plans / Entitlements
+                          ↓
+       ┌──────────────────┼──────────────────┐
+       ↓                  ↓                  ↓
+Tenant Provisioning   Usage Metering     Marketplace
+       ↓                  ↓                  ↓
+Workspace / Users     Billing Events     Extensions
+       └──────────────────┼──────────────────┘
+                          ↓
+                  LeadOps Control Plane
+~~~
+
+## 2. Repository Architecture
+
+~~~text
+leadops/
+├── product/
+│   ├── catalog/
+│   ├── packaging/
+│   ├── entitlements/
+│   └── lifecycle/
+├── tenants/
+│   ├── provisioning/
+│   ├── lifecycle/
+│   ├── workspaces/
+│   ├── organizations/
+│   └── isolation/
+├── commercial/
+│   ├── subscriptions/
+│   ├── contracts/
+│   ├── billing/
+│   ├── invoices/
+│   ├── credits/
+│   ├── discounts/
+│   ├── taxes/
+│   └── revenue-recognition/
+├── usage/
+│   ├── metering/
+│   ├── quotas/
+│   ├── budgets/
+│   ├── attribution/
+│   └── reporting/
+├── onboarding/
+│   ├── signup/
+│   ├── provisioning/
+│   ├── setup-wizard/
+│   ├── data-import/
+│   ├── integration-setup/
+│   ├── workflow-templates/
+│   └── activation/
+├── marketplace/
+│   ├── apps/
+│   ├── connectors/
+│   ├── templates/
+│   ├── agents/
+│   ├── publishing/
+│   ├── reviews/
+│   ├── compatibility/
+│   └── installation/
+├── customer-ops/
+│   ├── support/
+│   ├── customer-health/
+│   ├── success/
+│   ├── renewals/
+│   ├── incidents/
+│   └── communications/
+├── enterprise-admin/
+│   ├── organizations/
+│   ├── users/
+│   ├── roles/
+│   ├── security/
+│   ├── audit/
+│   ├── data/
+│   ├── billing/
+│   └── compliance/
+├── launch/
+│   ├── readiness/
+│   ├── release-gates/
+│   ├── migrations/
+│   ├── rollback/
+│   ├── runbooks/
+│   └── go-live/
+├── api/
+│   └── commercial/
+└── tests/
+    ├── product/
+    ├── tenancy/
+    ├── billing/
+    ├── entitlements/
+    ├── onboarding/
+    ├── marketplace/
+    ├── customer-ops/
+    └── launch/
+~~~
+
+## 3. Product Catalog
+
+The catalog is authoritative for what the platform sells.
+
+~~~text
+Product → Edition → Plan → Feature → Entitlement → Usage / Capacity Limit
+~~~
+
+Plans should be data-driven rather than embedded throughout application code. Catalog versions become immutable once referenced by an active commercial agreement.
+
+## 4. Entitlement Engine
+
+Entitlements determine whether a tenant may use a capability.
+
+~~~text
+Authenticated User
+      ↓
+Tenant Membership
+      ↓
+Subscription / Contract
+      ↓
+Plan Entitlements
+      ↓
+Workspace Permissions
+      ↓
+Capability Scope
+      ↓
+Policy
+      ↓
+ALLOW / DENY
+~~~
+
+An entitlement is not equivalent to authorization. A plan may include an AI agent while the user's role, capability scope, consent state, or policy still prevents a particular action.
+
+Entitlement dimensions include feature access, seats, workflows, agents, APIs, connectors, event volume, enrichment, storage, retention, and execution concurrency.
+
+## 5. Tenant Provisioning
+
+Tenant creation must be deterministic and idempotent.
+
+~~~text
+ACCOUNT CREATED → TENANT RESERVED → REGION ASSIGNED
+→ DATABASE / NAMESPACE CREATED → SECURITY BASELINE
+→ DEFAULT ROLES → DEFAULT WORKSPACE → ENTITLEMENTS
+→ AUDIT CONFIGURATION → INTEGRATION OPTIONS → TENANT ACTIVE
+~~~
+
+Every provisioning step requires an idempotency key. Partially provisioned tenants enter an explicit recovery state rather than appearing active.
+
+Lifecycle:
+
+~~~text
+PROVISIONING → ACTIVE → SUSPENDED → REACTIVATING → ACTIVE
+ACTIVE → OFFBOARDING → DELETED / RETAINED
+~~~
+
+## 6. Enterprise Administration
+
+Provide organization, workspace, user, group, role, SSO, SCIM, API-key, audit, data, billing, and compliance administration.
+
+Security administration includes authentication policy, session policy, MFA, SSO, SCIM, service credentials, access reviews, and privileged-role reviews.
+
+Administrative changes continue through the existing authorization and audit layers.
+
+## 7. Usage Metering
+
+Commercial usage must derive from durable platform events rather than UI counters.
+
+Meterable dimensions include leads processed, enrichment operations, workflow executions, agent tasks, AI inference, outbound communications, API requests, storage, event volume, connector operations, appointments, and revenue-ops decisions.
+
+~~~text
+Authoritative Event → Metering Consumer → Normalize → Deduplicate
+→ Aggregate → Apply Entitlement → Usage Ledger
+→ Billing Export → Customer Usage View
+~~~
+
+Usage records require tenant ID, metric, quantity, unit, source event ID, timestamps, and idempotency key. Replay must not double-count usage.
+
+## 8. Billing Architecture
+
+Billing consumes the usage ledger and commercial agreement.
+
+~~~text
+Subscription / Contract + Usage Ledger + Credits / Discounts + Taxes
+                         ↓
+                  Billing Calculation
+                         ↓
+                       Invoice
+                         ↓
+                  Payment Provider
+                         ↓
+                   Payment Event
+                         ↓
+                 Commercial Ledger
+~~~
+
+Payment failure must not immediately destroy tenant data. Commercial suspension is a controlled lifecycle action with explicit grace and recovery behavior.
+
+## 9. Commercial Controls
+
+Support upgrades, downgrades, renewals, scheduled plan changes, credits, discounts, contract-specific entitlements, usage overages, spending budgets, and administrative holds.
+
+Commercial changes should be effective-dated and auditable.
+
+## 10. Customer Onboarding
+
+~~~text
+SIGNUP → VERIFY → ORGANIZATION SETUP → IMPORT / CONNECT DATA
+→ CONNECT CRM → CONFIGURE COMMUNICATIONS → DEFINE POLICIES
+→ SELECT WORKFLOW TEMPLATES → TEST → ACTIVATE → FIRST VALUE
+~~~
+
+Track administrator setup, users, security, CRM, communications, calendar, data import, consent, suppression, workflow tests, first lead, qualified opportunity, appointment, and measurable outcome.
+
+## 11. Guided Setup Wizard
+
+Seven steps: Organization, Security, Data, Communications, Automation, Revenue Operations, and Launch Validation.
+
+Launch validation checks integration health, policy configuration, test execution, audit verification, and readiness.
+
+## 12. Marketplace Productization
+
+Stage 12 created the marketplace foundation; Stage 17 makes it commercially consumable.
+
+Categories include CRM connectors, communications, calendars, enrichment, analytics, workflow templates, agent packages, and reporting packs.
+
+Every artifact requires a manifest, version, compatibility range, capabilities, permissions, data requirements, security metadata, support owner, and release status.
+
+~~~text
+DRAFT → VALIDATION → SECURITY REVIEW → COMPATIBILITY TEST
+→ PUBLISH REVIEW → PUBLISHED → MONITORED → DEPRECATED / RETIRED
+~~~
+
+Installation remains subject to tenant authorization and connector capability scopes.
+
+## 13. Customer Health
+
+Customer health combines product adoption, active users, workflow utilization, integration health, automation success, support incidents, usage growth, entitlement utilization, onboarding completion, revenue outcomes, and renewal status.
+
+Health is an operational measurement, not autonomous authority for customer-impacting commercial decisions.
+
+## 14. Support Operations
+
+~~~text
+Customer → Support Request → Classification → Routing
+→ Investigation → Resolution → Customer Confirmation → Knowledge Capture
+~~~
+
+Cases should link to tenant, workspace, user, workflow, execution, integration, incident, and audit event.
+
+Severity should be based on measurable impact such as platform unavailability, revenue execution blocked, critical integration outage, degraded functionality, or informational request.
+
+## 15. Customer Success Automation
+
+Authorized automation may identify onboarding gaps, summarize account health, surface underused features, identify failed workflows, prepare renewal information, and recommend training resources.
+
+Customer-facing communications remain subject to tenant configuration, consent, communication policies, and applicable approvals.
+
+## 16. API Surface
+
+~~~text
+GET  /product/catalog
+GET  /product/plans
+GET  /product/features
+GET  /product/entitlements
+POST /product/entitlements/check
+
+POST /tenants
+GET  /tenants/:id
+POST /tenants/:id/provision
+POST /tenants/:id/suspend
+POST /tenants/:id/reactivate
+POST /tenants/:id/offboard
+GET  /tenants/:id/readiness
+
+GET  /usage
+GET  /usage/ledger
+GET  /usage/limits
+GET  /usage/budgets
+POST /usage/reconcile
+
+GET  /billing/subscription
+POST /billing/subscription/change
+GET  /billing/invoices
+GET  /billing/payment-methods
+POST /billing/credits
+GET  /billing/usage
+
+GET  /onboarding
+POST /onboarding/steps/:id/complete
+POST /onboarding/validate
+POST /onboarding/activate
+
+GET  /marketplace/apps
+GET  /marketplace/templates
+GET  /marketplace/agents
+POST /marketplace/install
+POST /marketplace/publish
+POST /marketplace/:id/uninstall
+
+GET  /customer-ops/health
+GET  /customer-ops/support
+POST /customer-ops/support
+GET  /customer-ops/success
+~~~
+
+## 17. Commercial Database Model
+
+~~~text
+products / product_versions / plans / plan_features / feature_entitlements
+entitlement_assignments
+organizations / tenant_provisioning_jobs / tenant_lifecycle_events
+workspaces / workspace_memberships
+subscriptions / subscription_items / contracts / contract_entitlements
+billing_accounts / invoices / invoice_items / payments / credits / discounts
+usage_events / usage_ledger / usage_aggregates / usage_budgets
+onboarding_sessions / onboarding_steps / activation_events
+marketplace_apps / marketplace_versions / marketplace_reviews
+marketplace_installations / marketplace_publications
+customer_health_snapshots / support_cases / customer_success_tasks
+launch_readiness / release_gates / go_live_records
+~~~
+
+Financial records require immutable history and explicit correction mechanisms rather than destructive updates.
+
+## 18. Commercial Events
+
+Required events include tenant lifecycle events, subscription and invoice events, usage events, onboarding and activation events, marketplace publication/install events, customer-health events, support events, and launch/go-live events.
+
+All events require tenant context where applicable, correlation IDs, idempotency keys, and durable audit linkage.
+
+## 19. Production Readiness Gate
+
+Before tenant activation verify infrastructure, security, integrations, automation, revenue operations, and commercial readiness.
+
+### Infrastructure
+- region, database, queues, event processing, and backups healthy.
+
+### Security
+- tenant isolation, administrator, authentication, secrets, and audit pipeline verified.
+
+### Integrations
+- required connectors authenticated, webhook verification active, mappings validated, synchronization healthy.
+
+### Automation
+- workflows and policies validated, approval paths tested, frequency caps configured, kill switches available.
+
+### Revenue Operations
+- routing, territories, business hours, appointment settings, and communication permissions validated.
+
+### Commercial
+- plan assigned, entitlements calculated, billing configured, usage metering active.
+
+A failed readiness gate prevents production activation.
+
+## 20. Go-Live Sequence
+
+~~~text
+READINESS REVIEW → FINAL BACKUP → FREEZE CONFIGURATION
+→ VERIFY INTEGRATIONS → VERIFY POLICIES → VERIFY ENTITLEMENTS
+→ ENABLE TENANT → CANARY TRAFFIC → OBSERVE SLOs → EXPAND
+→ GO-LIVE COMPLETE
+~~~
+
+The launch controller records every transition.
+
+## 21. Rollback
+
+Rollback targets may include the previous application release, workflow version, model version, connector version, authorized policy version, tenant configuration, or feature flag.
+
+~~~text
+Detect Failure → Classify Impact → Select Approved Rollback
+→ Fence New Execution → Rollback → Reconcile → Verify
+→ Resume / Escalate
+~~~
+
+Rollback must never erase audit history.
+
+## 22. Production Launch Dashboard
+
+Add a Launch & Commercial Operations workspace to the Command Center.
+
+### Launch
+- tenants pending activation; readiness failures; active canaries; deployment state; rollback state.
+
+### Commercial
+- subscriptions; usage; entitlement utilization; billing status; payment failures; overage exposure.
+
+### Customer
+- onboarding completion; activation; product adoption; support load; customer health.
+
+### Marketplace
+- installed apps; connector health; template adoption; publication status.
+
+## 23. Enterprise Admin Workspace
+
+~~~text
+/admin
+/admin/organization
+/admin/users
+/admin/groups
+/admin/roles
+/admin/security
+/admin/sso
+/admin/scim
+/admin/api-keys
+/admin/audit
+/admin/data
+/admin/billing
+/admin/usage
+/admin/entitlements
+/admin/marketplace
+/admin/support
+/admin/launch
+~~~
+
+Administrative screens use the Stage 14 typed API, server-state, realtime, permission, accessibility, and audit patterns.
+
+## 24. Security Model
+
+~~~text
+Identity → Tenant Membership → Subscription / Entitlement
+→ Role / Permission → Capability Scope → Policy
+→ Consent / Suppression → Approval → Execution → Audit
+~~~
+
+A paid subscription does not automatically authorize an operation. A feature entitlement does not bypass capability scopes. Marketplace installation does not bypass connector permissions. Billing administrators do not automatically receive operational execution privileges.
+
+## 25. Production Observability
+
+Track product activation and adoption; commercial subscriptions, usage, entitlement utilization and payment failures; operational SLOs, incidents, workflow failures, integration health, event lag and agent utilization; and customer onboarding, time-to-value, support volume, health, and renewal readiness.
+
+Commercial metrics remain separate from operational authorization decisions.
+
+## 26. Testing Strategy
+
+### Product
+- catalog versioning; plan changes; entitlement calculation; limit enforcement.
+
+### Tenant
+- idempotent provisioning; partial provisioning recovery; suspension/reactivation; offboarding; cross-tenant isolation.
+
+### Billing
+- duplicate usage events; invoice calculation; credits; payment retries; subscription transitions; reconciliation.
+
+### Marketplace
+- manifest validation; compatibility; installation permissions; uninstall cleanup; publication lifecycle.
+
+### Onboarding
+- incomplete setup; connector failure; policy failure; activation blocking; recovery.
+
+### Launch
+- readiness gate; canary; SLO breach; rollback; reconciliation; audit preservation.
+
+### Security
+- entitlement cannot bypass authorization; billing roles cannot execute restricted workflows; tenant admins cannot access another tenant; marketplace packages cannot exceed declared capabilities; suspended tenants cannot execute prohibited actions; usage replay cannot double-charge; rollback cannot delete audit history.
+
+## 27. Acceptance Criteria
+
+- [ ] products and plans are versioned;
+- [ ] entitlements are deterministic and auditable;
+- [ ] tenant provisioning is idempotent;
+- [ ] tenant lifecycle is explicit;
+- [ ] enterprise administration is operational;
+- [ ] usage is derived from authoritative events;
+- [ ] usage is replay-safe;
+- [ ] billing consumes the usage ledger;
+- [ ] commercial changes are effective-dated;
+- [ ] onboarding is measurable;
+- [ ] activation can be blocked by readiness failures;
+- [ ] marketplace publication is governed;
+- [ ] marketplace installation respects capability scopes;
+- [ ] customer health is observable;
+- [ ] support cases correlate with platform events;
+- [ ] production readiness gates are enforced;
+- [ ] go-live is auditable;
+- [ ] rollback is tested;
+- [ ] commercial roles remain separated from operational permissions;
+- [ ] financial records preserve immutable history;
+- [ ] cross-tenant isolation survives commercial operations;
+- [ ] production SLOs remain within configured budgets.
+
+## 28. Definition of Done
+
+~~~text
+PRODUCT → PLAN → ENTITLEMENT → TENANT → PROVISION → ONBOARD
+→ CONNECT → CONFIGURE → VALIDATE → ACTIVATE → METER → BILL
+→ OPERATE → SUPPORT → RENEW / EXPAND
+~~~
+
+The existing operational control loop remains authoritative:
+
+~~~text
+Signal → Intelligence → Prediction → Opportunity → NBA → Policy
+→ Routing → Workflow / Agent → Human Escalation → Execution
+→ Outcome → Attribution → Calibration → Optimization
+~~~
+
+The commercial loop surrounds the operational loop without changing its authority model.
+
+## 29. Stage 17 → Stage 18
+
+Stage 18 can focus on full production launch, growth infrastructure, partner ecosystem expansion, advanced billing automation, global tenant onboarding, customer lifecycle automation, revenue expansion analytics, and platform-wide optimization.
+
+~~~text
+Stage 17 — Commercial Productization
+          ↓
+Stage 18 — Production Launch & Growth
+          ↓
+Global Tenant Onboarding
+Enterprise SLA Operations
+Advanced Billing Automation
+Partner Ecosystem
+Customer Lifecycle Automation
+Revenue Expansion Analytics
+Platform-Wide Optimization
+          ↓
+Mature LeadOps SaaS Platform
+~~~

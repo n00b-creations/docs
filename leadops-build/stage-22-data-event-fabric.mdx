@@ -1,0 +1,52 @@
+---
+title: "Stage 22 — Database, Event Fabric & Persistence"
+sidebarTitle: "Production data model, event contracts, queues, persistence, migrations, outbox, idempotency, and replay architecture."
+description: "Database + event fabric"
+---
+
+# Stage 22 — Database, Event Fabric & Persistence
+
+Implement the durable data plane used by every downstream service.
+
+## Core infrastructure
+```text
+PostgreSQL → authoritative transactional state
+Redis → cache, locks, short-lived coordination
+Event broker → durable domain events
+Object storage → documents, exports, evidence
+Analytics store → aggregate analytical workloads
+```
+
+## Event pipeline
+```text
+Transaction
+  ↓
+Outbox
+  ↓
+Broker
+  ↓
+Consumer
+  ↓
+Idempotency
+  ↓
+Projection / Side Effect
+  ↓
+Audit
+```
+
+All consequential producers use an outbox pattern. Consumers store durable idempotency keys. Events are versioned and replayable.
+
+## Required controls
+- tenant and organization scope
+- schema version
+- event ID
+- causation/correlation IDs
+- producer identity
+- occurred-at timestamp
+- sequence where ordering matters
+- retention policy
+- replay policy
+- dead-letter handling
+
+## Data quality
+Implement constraints, uniqueness, foreign keys, soft-delete rules where required, migration tests, reconciliation jobs, freshness indicators, and lineage metadata.

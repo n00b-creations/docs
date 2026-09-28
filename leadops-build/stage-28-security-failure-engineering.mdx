@@ -1,0 +1,31 @@
+---
+title: "Stage 28 — Security, Compliance & Failure Engineering"
+sidebarTitle: "Validate tenant isolation, authorization, secrets, abuse controls, resilience, disaster scenarios, autonomous-operation safety, and end-to-end failure behavior."
+description: "Security + failure engineering"
+---
+
+# Stage 28 — Security, Compliance & Failure Engineering
+
+Production readiness requires adversarial and failure-oriented testing.
+
+## Security validation
+- authentication/session tests
+- RBAC/ABAC tests
+- tenant isolation tests
+- object-level authorization tests
+- secret exposure checks
+- webhook replay tests
+- rate-limit tests
+- SSRF/injection validation
+- dependency scanning
+- container/image scanning
+- audit integrity checks
+
+## Failure matrix
+Exercise database failure, cache failure, broker failure, worker crash, provider outage, stale model, policy outage, duplicate event, network partition, region loss, failed rollback, and remediation loops.
+
+## Autonomous safety tests
+Prove that unauthorized, expired, cross-tenant, policy-blocked, unapproved, and over-budget actions cannot execute.
+
+## Release gate
+No production release passes without security, contract, integration, E2E, recovery, and authorization-boundary evidence.

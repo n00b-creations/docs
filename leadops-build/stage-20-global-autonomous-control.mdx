@@ -1,0 +1,797 @@
+---
+title: "Stage 20 — Global Autonomous Platform Control & Enterprise Operating System"
+sidebarTitle: "Stage 20 — Global Autonomous Control"
+description: "Unified global control, orchestration, policy simulation, bounded self-healing, disaster orchestration, release management, and enterprise operating control for LeadOps."
+---
+
+# Stage 20 — Global Autonomous Platform Control & Enterprise Operating System
+
+## Purpose
+
+Stage 20 unifies the LeadOps platform into a governed global operating plane above the intelligence, revenue, commercial, growth, integration, and tenant systems built in Stages 1–19.
+
+The control plane coordinates execution across regions, tenants, workloads, integrations, releases, incidents, capacity, disaster recovery, and bounded autonomous operations.
+
+The control plane is an orchestration authority, not an authorization bypass.
+
+## Operating Architecture
+
+```
+Global Event Fabric
+        ↓
+Platform Intelligence
+        ↓
+Global Control Room / Decision Plane
+        ↓
+Policy / Authorization / Simulation
+        ↓
+Global Orchestration
+        ↓
+Regional / Tenant Execution
+        ↓
+Verification / Observability / Audit
+        ↓
+Recovery / Bounded Self-Healing
+        ↺
+```
+
+### Control hierarchy
+
+```
+Identity
+  ↓
+Tenant Membership
+  ↓
+Entitlement
+  ↓
+Role / Permission
+  ↓
+Capability Scope
+  ↓
+Policy
+  ↓
+Consent / Suppression
+  ↓
+Approval
+  ↓
+Execution
+  ↓
+Verification
+  ↓
+Audit
+```
+
+No global orchestration operation may skip or weaken these authoritative controls.
+
+## Repository Architecture
+
+```
+leadops/
+├── control-plane/
+│   ├── global/
+│   ├── decisions/
+│   ├── command/
+│   ├── policies/
+│   ├── simulations/
+│   └── approvals/
+├── orchestration/
+│   ├── global/
+│   ├── regional/
+│   ├── tenant/
+│   ├── workloads/
+│   └── dependencies/
+├── control-room/
+│   ├── dashboards/
+│   ├── incidents/
+│   ├── changes/
+│   ├── releases/
+│   ├── capacity/
+│   └── autonomous-ops/
+├── predictive-control/
+│   ├── capacity/
+│   ├── reliability/
+│   ├── demand/
+│   ├── cost/
+│   └── risk/
+├── self-healing/
+│   ├── detectors/
+│   ├── remediations/
+│   ├── safeguards/
+│   ├── cooldowns/
+│   └── escalation/
+├── disaster-orchestration/
+│   ├── failover/
+│   ├── recovery/
+│   ├── region-loss/
+│   ├── dependency-loss/
+│   └── drills/
+├── policy-simulation/
+│   ├── what-if/
+│   ├── impact/
+│   ├── diff/
+│   └── approvals/
+├── enterprise-ops/
+│   ├── status/
+│   ├── maintenance/
+│   ├── change-management/
+│   ├── release-management/
+│   └── evidence/
+├── api/
+│   └── control-room/
+└── tests/
+    └── global-control/
+```
+
+## Global Control Room
+
+The Command Center gains a Global Operations workspace covering:
+
+- global platform health
+- regional health
+- tenant health
+- SLOs and error budgets
+- active incidents
+- deployments and releases
+- migrations
+- capacity
+- infrastructure cost
+- connector health
+- workflow queues
+- autonomous operations
+- pending approvals
+- policy simulations
+- maintenance windows
+- disaster-recovery state
+- recovery checkpoints
+- operational evidence
+
+Every control-room action must expose scope, actor, capability, policy decision, execution state, and audit reference.
+
+## Decision Lifecycle
+
+All consequential control decisions use a durable state machine:
+
+```
+OBSERVED
+   ↓
+EVALUATED
+   ↓
+PROPOSED
+   ↓
+SIMULATED
+   ↓
+POLICY_CHECKED
+   ↓
+APPROVAL_REQUIRED ──→ APPROVED
+                         ↓
+                     EXECUTING
+                         ↓
+                     VERIFIED
+                         ↓
+          ┌──────────────┼──────────────┐
+          ↓              ↓              ↓
+      COMPLETED      ROLLED_BACK    ESCALATED
+```
+
+A decision cannot jump directly from observation to consequential execution.
+
+## Global Orchestration
+
+The orchestration layer coordinates:
+
+- global jobs
+- regional workloads
+- tenant workloads
+- dependency-aware execution
+- migrations
+- releases
+- failovers
+- recovery
+- maintenance
+- queue draining
+- workload rebalancing
+- connector recovery
+- capacity actions
+
+### Required execution controls
+
+Every consequential task requires:
+
+- tenant and region scope
+- capability requirements
+- authorization reference
+- policy decision
+- durable idempotency key
+- execution lease
+- fencing token where applicable
+- dependency checks
+- expiration
+- retry budget
+- rollback or escalation strategy
+- audit reference
+
+The system should provide effectively-once semantics for consequential actions through durable idempotency, leases, and reconciliation rather than assuming literal distributed exactly-once execution.
+
+## Dependency Graph
+
+Platform dependencies are represented as a directed graph.
+
+Example:
+
+```
+Database
+   ↓
+API
+   ↓
+Workflow Engine
+   ↓
+Communication Adapter
+   ↓
+Lead Execution
+   ↓
+Revenue Attribution
+```
+
+The orchestration engine uses dependency state to determine whether an operation can proceed, must wait, or must enter recovery.
+
+Dependency failures must not cause unrelated tenant workloads to bypass isolation or authorization.
+
+## Predictive Control
+
+Stage 19 identifies optimization opportunities. Stage 20 adds controlled platform execution.
+
+### Capacity
+
+Monitor and forecast:
+
+- CPU
+- memory
+- database connections
+- queue depth
+- worker concurrency
+- model inference capacity
+- storage
+- network
+- connector quotas
+- regional capacity
+- tenant workload demand
+
+### Reliability
+
+Predict:
+
+- SLO exhaustion
+- queue saturation
+- dependency failure
+- regional degradation
+- retry storms
+- workflow instability
+- connector failure
+- database pressure
+
+### Cost
+
+Model:
+
+- compute
+- storage
+- inference
+- communications
+- enrichment
+- connector usage
+- data transfer
+- support operations
+
+### Risk
+
+Model:
+
+- blast radius
+- dependency criticality
+- tenant impact
+- security impact
+- compliance impact
+- financial impact
+- reversibility
+- confidence
+
+Predictive output is evidence for a control decision, not authorization by itself.
+
+## Policy Simulation
+
+Before high-impact policy, configuration, capacity, or operational changes, the system can run a what-if simulation.
+
+A simulation should calculate:
+
+- affected tenants
+- affected regions
+- affected workflows
+- affected integrations
+- expected SLO impact
+- expected cost impact
+- security impact
+- compliance impact
+- capacity impact
+- dependency impact
+- rollback feasibility
+- blast radius
+
+### Simulation contract
+
+```ts
+interface PolicySimulation {
+  id: string;
+  scope: "tenant" | "region" | "platform";
+  proposedChange: unknown;
+  baselineVersion: string;
+  predictedImpact: {
+    tenants: number;
+    regions: number;
+    sloRisk: number;
+    costDelta: number;
+    capacityDelta: number;
+    securityImpact: string;
+  };
+  affectedResources: string[];
+  rollbackPlan: unknown;
+  confidence: number;
+  status:
+    | "RUNNING"
+    | "COMPLETED"
+    | "REJECTED"
+    | "EXPIRED";
+  createdAt: string;
+  expiresAt: string;
+}
+```
+
+Simulation informs approval; it does not grant approval.
+
+## Bounded Self-Healing
+
+Self-healing handles predefined, low-risk operational failures.
+
+Examples:
+
+- restart failed worker
+- drain unhealthy queue consumer
+- retry transient connector request
+- apply approved backoff
+- rebalance workers within configured limits
+- fail traffic over within an approved policy
+- restore a known-good release
+- pause an unstable workflow
+- escalate a persistent dependency failure
+
+### Safeguards
+
+Every remediation requires:
+
+- explicit rule
+- allowed action
+- scope
+- blast-radius limit
+- maximum attempts
+- cooldown
+- timeout
+- rollback
+- escalation target
+- audit event
+- kill-switch evaluation
+
+The self-healing layer cannot autonomously modify:
+
+- authorization policies
+- tenant isolation
+- consent rules
+- suppression rules
+- security boundaries
+- billing authority
+- financial commitments
+- privileged access
+
+Those operations require the existing governance chain.
+
+## Disaster Orchestration
+
+The disaster layer coordinates:
+
+- regional failover
+- regional recovery
+- database failover
+- dependency loss
+- queue loss
+- connector provider outage
+- cloud/provider outage
+- network partition
+- service degradation
+- recovery verification
+
+### Recovery lifecycle
+
+```
+DETECTED
+   ↓
+IMPACT_ASSESSED
+   ↓
+FENCED
+   ↓
+FAILOVER_PLANNED
+   ↓
+APPROVED
+   ↓
+FAILOVER_EXECUTING
+   ↓
+TRAFFIC_RESTORED
+   ↓
+DATA_VERIFIED
+   ↓
+DEPENDENCIES_VERIFIED
+   ↓
+SERVICE_VERIFIED
+   ↓
+RECOVERY_COMPLETE
+```
+
+Fencing prevents split-brain execution.
+
+Recovery must verify data integrity and authoritative state before declaring success.
+
+### DR drills
+
+The platform supports scheduled simulations for:
+
+- region loss
+- database failure
+- queue failure
+- provider outage
+- connector outage
+- dependency failure
+
+Drills produce measurable RPO/RTO evidence and remediation tasks.
+
+## Release and Change Management
+
+Global operations integrate with Stage 18 progressive delivery.
+
+Supported strategies:
+
+- canary
+- blue/green
+- progressive rollout
+- tenant waves
+- regional waves
+- feature flags
+- migration gates
+- automatic rollback on defined SLO violations
+
+Every release records:
+
+- version
+- scope
+- actor
+- approval
+- rollout plan
+- health gates
+- metrics
+- rollback point
+- final outcome
+
+Freeze windows and emergency-change workflows are explicit.
+
+## Enterprise Operations
+
+Enterprise operations provide:
+
+- maintenance scheduling
+- incident coordination
+- customer-impact tracking
+- status information
+- SLA evidence
+- release evidence
+- compliance evidence
+- recovery evidence
+- change history
+
+Operational evidence is append-only from the control plane's perspective and references authoritative audit records.
+
+## APIs
+
+### Control room
+
+```
+GET    /control-room/overview
+GET    /control-room/regions
+GET    /control-room/tenants
+GET    /control-room/incidents
+GET    /control-room/capacity
+GET    /control-room/autonomous-operations
+GET    /control-room/approvals
+```
+
+### Decisions
+
+```
+POST   /control-room/decisions
+GET    /control-room/decisions/:id
+POST   /control-room/decisions/:id/simulate
+POST   /control-room/decisions/:id/approve
+POST   /control-room/decisions/:id/reject
+POST   /control-room/decisions/:id/execute
+POST   /control-room/decisions/:id/rollback
+```
+
+### Orchestration
+
+```
+POST   /orchestration/runs
+GET    /orchestration/runs/:id
+POST   /orchestration/runs/:id/pause
+POST   /orchestration/runs/:id/resume
+POST   /orchestration/runs/:id/cancel
+```
+
+### Simulation
+
+```
+POST   /policy-simulations
+GET    /policy-simulations/:id
+GET    /policy-simulations/:id/impact
+GET    /policy-simulations/:id/diff
+```
+
+### Self-healing
+
+```
+GET    /self-healing/rules
+GET    /self-healing/runs
+POST   /self-healing/runs/:id/pause
+POST   /self-healing/runs/:id/escalate
+```
+
+### Disaster recovery
+
+```
+POST   /disaster-recovery/drills
+POST   /disaster-recovery/runs
+GET    /disaster-recovery/runs/:id
+POST   /disaster-recovery/runs/:id/failover
+POST   /disaster-recovery/runs/:id/recover
+GET    /disaster-recovery/runs/:id/checkpoints
+```
+
+### Releases and maintenance
+
+```
+POST   /releases
+GET    /releases/:id
+POST   /releases/:id/approve
+POST   /releases/:id/rollback
+
+POST   /maintenance-windows
+GET    /maintenance-windows
+```
+
+## Data Model
+
+Core tables:
+
+```
+global_decisions
+decision_steps
+control_actions
+control_leases
+orchestration_runs
+orchestration_tasks
+dependency_graphs
+self_healing_rules
+remediation_runs
+remediation_safeguards
+policy_simulations
+disaster_runs
+recovery_checkpoints
+change_requests
+release_runs
+maintenance_windows
+operational_evidence
+```
+
+Each table must include tenant/scope metadata where applicable and immutable audit references for consequential state transitions.
+
+## Events
+
+### Control
+
+```
+control.decision.created
+control.decision.evaluated
+control.decision.simulated
+control.decision.approved
+control.decision.blocked
+control.decision.executing
+control.decision.completed
+control.decision.rolled_back
+control.decision.escalated
+```
+
+### Orchestration
+
+```
+orchestration.run.created
+orchestration.task.started
+orchestration.task.completed
+orchestration.task.failed
+orchestration.run.paused
+orchestration.run.completed
+```
+
+### Self-healing
+
+```
+self_healing.triggered
+self_healing.remediation.started
+self_healing.remediation.completed
+self_healing.remediation.rolled_back
+self_healing.escalated
+```
+
+### Disaster recovery
+
+```
+disaster.detected
+disaster.fenced
+disaster.failover.started
+disaster.failover.completed
+recovery.verification.started
+recovery.verification.completed
+recovery.completed
+```
+
+### Release
+
+```
+release.created
+release.canary.started
+release.wave.completed
+release.rollback.started
+release.rollback.completed
+release.completed
+```
+
+## Kill Switch Hierarchy
+
+Global control introduces explicit emergency controls:
+
+```
+GLOBAL
+  ↓
+REGION
+  ↓
+TENANT
+  ↓
+DOMAIN
+  ↓
+WORKFLOW
+  ↓
+AGENT
+  ↓
+ACTION TYPE
+```
+
+A more restrictive kill switch always wins.
+
+Emergency pause must stop consequential autonomous execution while preserving telemetry, audit, and recovery workflows.
+
+## Failure Handling
+
+### Intelligence unavailable
+
+Preserve source events and use the last valid intelligence snapshot where permitted.
+
+### Policy unavailable
+
+Fail closed for consequential autonomous actions.
+
+### Authorization unavailable
+
+Do not execute.
+
+### Simulation unavailable
+
+Block actions requiring simulation.
+
+### Rollback unavailable
+
+Fence the operation and escalate.
+
+### Cross-tenant scope violation
+
+Block, record, and alert.
+
+### Regional control-plane failure
+
+Fail over only through pre-authorized recovery policy.
+
+### Duplicate execution request
+
+Resolve through durable idempotency.
+
+### Stale decision
+
+Expire and require reevaluation.
+
+### Unstable remediation loop
+
+Apply cooldown, pause, and escalate.
+
+## Security and Tenant Isolation
+
+Global scope must never imply access to raw tenant data.
+
+The control plane must enforce:
+
+- tenant isolation
+- organization boundaries
+- region constraints
+- capability-scoped execution
+- least privilege
+- immutable audit references
+- policy checks
+- approval requirements
+- secret isolation
+- encrypted control-plane state
+- signed internal service requests
+- replay protection
+- fencing
+
+Cross-tenant aggregate intelligence may only use explicitly approved aggregate products and must not silently widen into tenant-level records.
+
+## Observability
+
+Measure:
+
+- decision latency
+- policy-check latency
+- simulation latency
+- orchestration success rate
+- orchestration duration
+- task retry rate
+- remediation success rate
+- rollback rate
+- recovery time
+- RPO/RTO
+- release failure rate
+- canary failure rate
+- SLO impact
+- control-plane availability
+- authorization blocks
+- cross-scope violations
+- autonomous execution volume
+- human approval latency
+
+The control plane should expose its own health as a first-class operational product.
+
+## Acceptance Criteria
+
+Stage 20 is complete when:
+
+1. A unified global control room exists.
+2. Consequential decisions use a durable lifecycle.
+3. Global orchestration respects tenant, region, dependency, and policy boundaries.
+4. Durable idempotency prevents duplicate consequential execution.
+5. Policy simulation supports what-if impact analysis.
+6. Bounded self-healing operates only within explicit safeguards.
+7. Disaster orchestration supports fencing, failover, recovery, and verification.
+8. Release and change management support progressive rollout and rollback.
+9. Operational evidence is auditable.
+10. Global, regional, tenant, domain, workflow, agent, and action kill switches are enforced.
+11. Policy or authorization outages fail closed for consequential autonomous actions.
+12. Cross-tenant violations are blocked and audited.
+13. Recovery operations verify authoritative state before completion.
+14. No autonomous control path can redefine authorization, consent, suppression, security, tenant isolation, or financial authority.
+
+## Operating Principle
+
+> **A global control plane coordinates execution; it does not become a global bypass of tenant or policy authority.**
+
+Stage 20 completes the major architectural control layer. Subsequent work should prioritize implementation, integration, testing, deployment, and production validation rather than adding additional abstract architecture stages.

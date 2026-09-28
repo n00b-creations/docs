@@ -1,0 +1,39 @@
+---
+title: "Stage 24 — Workers, Workflow Runtime & Agent Execution"
+sidebarTitle: "Stage 24 — Workers & Agent Runtime"
+description: "Queue workers, workflow runtime, agent execution, retries, schedules, and bounded automation."
+---
+
+# Stage 24 — Workers, Workflow Runtime & Agent Execution
+
+Build the execution runtime that turns signals and decisions into work.
+
+## Runtime
+```text
+Queue
+ ↓
+Scheduler
+ ↓
+Worker lease
+ ↓
+Capability check
+ ↓
+Policy check
+ ↓
+Execute
+ ↓
+Verify
+ ↓
+Persist outcome
+```
+
+## Worker classes
+Signal, enrichment, scoring, communication, workflow, agent, revenue, forecasting, optimization, anomaly, control, recovery.
+
+## Agent runtime
+Agents receive explicit task contracts, allowed tools, tenant scope, deadlines, budgets, and required approvals. Tool calls are capability-scoped and audited.
+
+## Reliability
+Implement exponential backoff, jitter, retry budgets, dead-letter queues, visibility timeouts, heartbeats, cancellation, concurrency limits, circuit breakers, and poison-message quarantine.
+
+No agent can grant itself capabilities, expand scope, disable policy, or bypass approval.

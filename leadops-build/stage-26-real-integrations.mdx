@@ -1,0 +1,36 @@
+---
+title: "Stage 26 — Production Integration Connectors"
+sidebarTitle: "Stage 26 — Real Integrations"
+description: "Production CRM, communications, calendar, marketing, enrichment, billing, and collaboration connectors."
+---
+
+# Stage 26 — Production Integration Connectors
+
+Turn the integration marketplace architecture into production adapters.
+
+## Initial connector families
+CRM, communications, calendar, marketing, enrichment, billing, collaboration, analytics.
+
+Each connector implements connect, disconnect, health, capabilities, inbound event handling, outbound actions, synchronization, rate limits, retries, and credential rotation.
+
+## Sync architecture
+```text
+External Event
+ ↓
+Webhook Verification
+ ↓
+Canonical Event
+ ↓
+Entity Resolution
+ ↓
+Conflict Policy
+ ↓
+Authoritative Write
+ ↓
+Outbound Projection
+```
+
+## Safety
+Webhook signatures, replay protection, scoped credentials, secret isolation, provider rate limits, idempotent writes, consent/suppression enforcement, connector kill switches, and complete audit trails.
+
+Start with a small production connector set, then expand through the marketplace without changing the canonical domain model.

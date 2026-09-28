@@ -1,0 +1,65 @@
+---
+title: "Stage 21 — Repository Implementation Foundation"
+sidebarTitle: "Stage 21 — Implementation Foundation"
+description: "Repository implementation foundation for contracts, services, configuration, testing, local development, and CI."
+---
+
+# Stage 21 — Repository Implementation Foundation
+
+The architecture now becomes an executable monorepo. Establish shared contracts, service boundaries, configuration, dependency rules, local development, CI, and implementation standards without changing the Stage 1–20 authority model.
+
+## Repository
+```text
+apps/
+  web/
+  api/
+services/
+  identity/
+  tenants/
+  leads/
+  intelligence/
+  workflows/
+  agents/
+  revenue/
+  integrations/
+  control-plane/
+packages/
+  contracts/
+  events/
+  authz/
+  policy/
+  database/
+  observability/
+  config/
+  testing/
+infrastructure/
+  docker/
+  kubernetes/
+  terraform/
+tests/
+  unit/
+  integration/
+  e2e/
+```
+
+## Standards
+- TypeScript strict mode
+- schema-first API contracts
+- versioned events
+- centralized configuration validation
+- structured logging
+- OpenTelemetry-compatible tracing
+- deterministic migrations
+- idempotent commands
+- tenant-scoped repositories
+- policy checks at service boundaries
+- dependency inversion between domains
+
+## Local stack
+PostgreSQL, Redis, event broker, object storage emulator, API, workers, and web application run through Docker Compose.
+
+## CI
+CI must run formatting, linting, type checking, unit tests, contract tests, migration validation, build, security scanning, and artifact generation.
+
+## Definition of done
+A new service can be created from the standard template, receives typed contracts, telemetry, health checks, authorization hooks, tests, and CI automatically.

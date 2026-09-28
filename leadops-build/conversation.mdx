@@ -1,0 +1,105 @@
+---
+title: "LeadOps Build Conversation"
+sidebarTitle: "This Conversation"
+description: "Architecture history and continuity for the LeadOps build."
+---
+
+# LeadOps Build Conversation
+
+This section preserves the architecture and implementation direction developed in the LeadOps build conversation.
+
+## Current stage
+
+The platform has progressed through:
+
+- Stage 6 — Autonomous Lead Intelligence & Prospect Discovery
+- Stage 7 — Revenue Intelligence + Optimization
+- Stage 8 — Predictive Revenue + Autonomous LeadOps Optimization
+- Stage 9 — Autonomous LeadOps Control Plane
+- Stage 10 — Production Infrastructure, Security, Multi-Tenancy & Deployment
+
+## Architecture progression
+
+```
+Signals
+  ↓
+Lead Intelligence
+  ↓
+Revenue Intelligence
+  ↓
+Predictive Intelligence
+  ↓
+Next-Best-Action
+  ↓
+Autonomous Control Plane
+  ↓
+Production Infrastructure
+```
+
+## Stage 10 production boundary
+
+Stage 10 established the production foundation:
+
+- Multi-tenant architecture and tenant isolation
+- RBAC and ABAC
+- Authentication, sessions, and API keys
+- Secret management and encryption
+- Webhook signature verification and replay protection
+- Rate limiting
+- PostgreSQL, Redis, queues, workers, and object storage
+- Audit logging
+- Structured logs, metrics, and distributed tracing
+- Health and readiness endpoints
+- Backups and disaster recovery
+- CI/CD and security scanning
+- Infrastructure as code
+- Local, staging, and production environments
+- Autoscaling and provider-failure handling
+- Feature flags
+- Autonomous-action governance and auditability
+
+## Stage 11 direction
+
+The next build boundary is **Enterprise Integrations & LeadOps Ecosystem**.
+
+The integration architecture should use stable adapter contracts and event-driven connectors rather than hard-coding LeadOps to one provider.
+
+```
+                    LEADOPS ECOSYSTEM
+                           │
+       ┌───────────────────┼───────────────────┐
+       ▼                   ▼                   ▼
+      CRM               Marketing            Sales
+       │                   │                   │
+       ├── CRM adapters    ├── Ads             ├── Collaboration
+       ├── Contact sync    ├── Analytics       ├── Notifications
+       └── Custom CRM      └── Webhooks        └── Sales tools
+       │
+       ▼
+  Calendar / Email / SMS / Voice
+       │
+       ▼
+  Payments / Contracts / Revenue
+       │
+       ▼
+  Data Warehouse / BI / Reporting
+```
+
+## Design principle
+
+Every external integration should sit behind an adapter:
+
+```ts
+interface IntegrationAdapter {
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  health(): Promise<IntegrationHealth>;
+  handleEvent(event: ExternalEvent): Promise<void>;
+}
+```
+
+The control plane remains the authority for permissions, tenant scope, policy, execution, retries, and auditability.
+
+## Conversation continuity
+
+Future LeadOps build stages should continue from this architecture rather than restarting the design. New stages should update the repository tree, API surface, data model, security model, tests, deployment model, and documentation as appropriate.
