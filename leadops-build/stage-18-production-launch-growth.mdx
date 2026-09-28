@@ -1,0 +1,593 @@
+---
+title: "Stage 18 — Production Launch & Growth"
+sidebarTitle: "Stage 18 — Production Launch & Growth"
+description: "Production rollout, tenant acquisition and activation, customer lifecycle, partner operations, enterprise SLA operations, growth intelligence, and controlled global launch architecture for LeadOps."
+---
+
+# Stage 18 — Production Launch & Growth
+
+## Purpose
+
+Stage 18 turns the commercialized LeadOps platform from a deployable product into a controlled production-launch and growth operating system. It adds global rollout, tenant acquisition and activation, customer lifecycle operations, expansion analytics, partner programs, enterprise SLA operations, and growth intelligence while preserving the authorization and audit boundaries established in Stages 1–17.
+
+## System Position
+
+~~~text
+Productized Platform
+      ↓
+Global Launch Control Plane
+      ↓
+Tenant Acquisition / Provisioning
+      ↓
+Activation / Usage
+      ↓
+Revenue Expansion
+      ↓
+Customer Lifecycle
+      ↓
+Partner / Marketplace Ecosystem
+      ↓
+Enterprise SLA / Support
+      ↓
+Platform Growth Intelligence
+      ↺
+~~~
+
+Production growth is an operating loop, not a separate authority plane. Commercial recommendations may prioritize work, but they cannot bypass tenant authorization, consent, suppression, policy, approval, billing controls, or audit requirements.
+
+## Repository Architecture
+
+~~~text
+leadops/
+├── growth/
+│   ├── acquisition/
+│   ├── activation/
+│   ├── retention/
+│   ├── expansion/
+│   ├── referrals/
+│   └── lifecycle/
+├── launch/
+│   ├── global-rollout/
+│   ├── tenant-waves/
+│   ├── canary/
+│   ├── migrations/
+│   ├── rollback/
+│   └── readiness/
+├── customer-lifecycle/
+│   ├── journeys/
+│   ├── segmentation/
+│   ├── health/
+│   ├── renewal/
+│   └── expansion/
+├── partner/
+│   ├── programs/
+│   ├── referrals/
+│   ├── resellers/
+│   └── attribution/
+├── enterprise-sla/
+│   ├── contracts/
+│   ├── monitoring/
+│   ├── credits/
+│   └── reporting/
+├── growth-intelligence/
+│   ├── funnels/
+│   ├── cohorts/
+│   ├── retention/
+│   ├── expansion/
+│   └── forecasting/
+├── launch-ops/
+├── api/
+│   └── growth/
+└── tests/
+    └── production/
+~~~
+
+## 1. Global Production Rollout
+
+The launch control plane coordinates production deployment by region, tenant cohort, application version, schema version, workflow version, model version, connector version, policy version, and feature flags.
+
+### Rollout sequence
+
+~~~text
+READINESS REVIEW
+      ↓
+BACKUP / SNAPSHOT
+      ↓
+CONFIGURATION FREEZE
+      ↓
+INTEGRATION + POLICY VERIFICATION
+      ↓
+CANARY COHORT
+      ↓
+SLO / ERROR / REVENUE OBSERVATION
+      ↓
+TENANT WAVE EXPANSION
+      ↓
+REGIONAL EXPANSION
+      ↓
+GENERAL AVAILABILITY
+~~~
+
+Each rollout assignment records the tenant, region, release versions, start time, gates, observed SLOs, migration state, rollback target, and operator or automation identity.
+
+### Rollout safety
+
+- Feature flags control progressive exposure.
+- Canary cohorts are explicitly bounded.
+- Migrations are ordered and checkpointed.
+- Rollout expansion requires measurable gate conditions.
+- A failed gate fences further expansion.
+- Rollback restores an authorized previous release state.
+- Consequential execution is fenced before destructive rollback operations.
+- Audit history is preserved across rollback.
+
+## 2. Tenant Acquisition and Activation
+
+Stage 18 measures the complete customer funnel:
+
+~~~text
+Lead → Trial / Demo → Account → Provision → Setup
+→ Activation → First Value → Adoption → Expansion → Renewal
+~~~
+
+Activation milestones should be explicit and machine-readable rather than inferred from a single login event.
+
+Example milestones include:
+
+- Organization configured
+- Security baseline completed
+- Users invited
+- CRM connected
+- Communication provider connected
+- Calendar connected
+- Data import completed
+- Consent and suppression configuration verified
+- First workflow tested
+- First lead processed
+- First opportunity generated
+- First appointment or equivalent business outcome recorded
+
+Activation analytics should expose time-to-first-value, milestone completion, drop-off points, and configuration failures.
+
+## 3. Customer Lifecycle Automation
+
+Customer lifecycle journeys coordinate onboarding, adoption, support, renewal, and expansion signals.
+
+~~~text
+ONBOARD
+  ↓
+ACTIVATE
+  ↓
+ADOPT
+  ↓
+MEASURE HEALTH
+  ↓
+IDENTIFY GAP / OPPORTUNITY
+  ↓
+ASSIST / EDUCATE / SUPPORT
+  ↓
+RENEW OR EXPAND
+~~~
+
+Lifecycle automation can identify configuration gaps, failed workflows, underused capabilities, declining usage, support patterns, renewal windows, and expansion opportunities.
+
+Customer-facing communications remain subject to the same consent, suppression, frequency, channel, tenant, and approval policies used elsewhere in LeadOps. A lifecycle recommendation is not authorization to contact a customer.
+
+## 4. Customer Segmentation
+
+Segments can combine observable operational and commercial dimensions such as:
+
+- Plan and entitlement
+- Tenant size
+- Workspace activity
+- Feature adoption
+- Workflow volume
+- Connector usage
+- Agent utilization
+- Revenue outcomes
+- Support activity
+- Contract timing
+- Region and residency requirements
+
+Segments are versioned so that historical cohort analysis remains reproducible.
+
+## 5. Revenue Expansion Intelligence
+
+Expansion intelligence identifies measurable product-fit signals without making unauthorized commercial commitments.
+
+Candidate inputs include:
+
+- Seat utilization
+- Usage approaching plan limits
+- Feature adoption
+- Connector breadth
+- Workflow execution growth
+- Agent task growth
+- Contract renewal timing
+- Additional workspace demand
+- Customer-requested capabilities
+
+An expansion opportunity should contain evidence, confidence, estimated commercial impact where available, relevant entitlement state, and an expiration or review time.
+
+Expansion recommendations flow through customer-ops and commercial policy before any quote, plan change, credit, discount, or contract modification is executed.
+
+## 6. Partner Ecosystem
+
+Stage 18 adds partner operations for referrals, resellers, implementation partners, and marketplace-driven acquisition.
+
+Partner artifacts include:
+
+- Partner account
+- Program membership
+- Referral source
+- Referral attribution
+- Customer association
+- Revenue attribution
+- Revenue-share configuration
+- Partner permissions
+- Marketplace installation attribution
+- Effective dates
+
+Partner attribution must be deterministic and idempotent. A duplicate webhook, replayed referral, or repeated marketplace event must not create duplicate commercial credit.
+
+## 7. Enterprise SLA Operations
+
+Enterprise SLA operations connect contractual commitments to measurable platform evidence.
+
+~~~text
+SLA CONTRACT
+    ↓
+TARGET DEFINITIONS
+    ↓
+TELEMETRY
+    ↓
+SLA MEASUREMENT
+    ↓
+BREACH EVALUATION
+    ↓
+CREDIT / COMMUNICATION WORKFLOW
+    ↓
+AUDITABLE REPORT
+~~~
+
+Supported measurements can include availability, API latency, workflow success, event-processing lag, connector freshness, and incident response metrics where contractually applicable.
+
+SLA credits or other contractual remedies must be derived from authoritative contract terms and remain auditable. Monitoring does not itself modify contracts.
+
+## 8. Growth Intelligence
+
+Growth intelligence provides measurement across acquisition, activation, retention, expansion, referrals, and revenue.
+
+Core analytical views include:
+
+- Funnel conversion
+- Cohort activation
+- Time-to-first-value
+- Retention
+- Feature adoption
+- Usage expansion
+- Renewal outcomes
+- Partner contribution
+- Marketplace contribution
+- Support and incident impact
+- Revenue expansion
+- Experiment performance
+
+Forecasts should be versioned with their population, feature set, model or method, timestamp, assumptions, and realized outcomes so forecast error can be measured.
+
+## 9. Growth Experiments
+
+Experiments can test onboarding flows, workflow templates, product education, packaging presentation, lifecycle timing, or other permitted product experiences.
+
+Every experiment requires:
+
+- Owner
+- Population
+- Inclusion and exclusion rules
+- Assignment method
+- Start and end dates
+- Primary metric
+- Guardrail metrics
+- Traffic limit
+- Rollback condition
+- Versioned configuration
+
+Experiments must not override security, consent, suppression, tenant isolation, financial controls, or authorization policies.
+
+## 10. Production Operations
+
+Stage 18 adds a production operating model for customer-facing service delivery.
+
+Operational domains include:
+
+- Incident response
+- Customer escalation
+- Release management
+- Migration operations
+- Regional operations
+- Status communication
+- Support escalation
+- Maintenance windows
+- Runbook execution
+- Disaster recovery coordination
+
+Each production incident should correlate affected tenants, services, releases, integrations, workflows, executions, SLO measurements, and remediation actions where available.
+
+## 11. API Surface
+
+~~~text
+GET  /growth/funnel
+GET  /growth/activation
+GET  /growth/segments
+GET  /growth/cohorts
+GET  /growth/retention
+GET  /growth/expansion
+POST /growth/experiments
+POST /growth/experiments/:id/pause
+POST /growth/experiments/:id/rollback
+
+GET  /customer-lifecycle/journeys
+POST /customer-lifecycle/journeys/:id/run
+GET  /customer-lifecycle/health
+GET  /customer-lifecycle/renewals
+GET  /customer-lifecycle/expansion
+
+GET  /partners
+POST /partners
+GET  /partners/referrals
+GET  /partners/attribution
+
+GET  /enterprise-sla/contracts
+GET  /enterprise-sla/measurements
+GET  /enterprise-sla/credits
+GET  /enterprise-sla/reports
+
+GET  /launch/readiness
+GET  /launch/waves
+POST /launch/waves
+POST /launch/waves/:id/start
+POST /launch/waves/:id/pause
+POST /launch/waves/:id/rollback
+GET  /launch/incidents
+GET  /launch/status
+~~~
+
+## 12. Data Model
+
+~~~text
+acquisition_sources
+trials
+activation_milestones
+lifecycle_journeys
+customer_segments
+renewal_plans
+expansion_opportunities
+partner_accounts
+partner_referrals
+partner_attribution
+sla_contracts
+sla_measurements
+sla_credits
+launch_waves
+rollout_assignments
+migration_runs
+production_incidents
+growth_experiments
+cohort_snapshots
+~~~
+
+All commercially consequential records require tenant context, timestamps, correlation identifiers, idempotency where applicable, version information, and audit linkage.
+
+## 13. Command Center Integration
+
+Stage 13/14 gains a Production & Growth workspace with:
+
+- Global launch status
+- Active rollout waves
+- Canary health
+- Tenant activation funnel
+- Customer lifecycle health
+- Renewal and expansion pipeline
+- Partner contribution
+- SLA status
+- Production incidents
+- Growth experiments
+- Cohort trends
+- Platform adoption
+
+Every action follows the established chain:
+
+~~~text
+Identity → Tenant Membership → Entitlement → Role / Permission
+→ Capability Scope → Policy → Consent / Suppression
+→ Approval where required → Execution → Audit
+~~~
+
+## 14. Production Growth Events
+
+Representative events:
+
+~~~text
+growth.trial_started
+growth.tenant_provisioned
+growth.activation_milestone_completed
+growth.first_value_recorded
+growth.segment_assigned
+growth.expansion_identified
+growth.renewal_window_opened
+growth.experiment_assigned
+growth.experiment_completed
+growth.cohort_snapshot_created
+
+partner.referral_created
+partner.referral_attributed
+partner.revenue_attributed
+
+sla.measurement_recorded
+sla.breach_detected
+sla.credit_calculated
+sla.report_generated
+
+launch.readiness_completed
+launch.canary_started
+launch.wave_started
+launch.wave_paused
+launch.wave_completed
+launch.rollback_started
+launch.rollback_completed
+production.incident_created
+production.incident_resolved
+~~~
+
+Event contracts inherit the platform requirements for tenant context, correlation IDs, event versioning, idempotency, ordering where required, audit linkage, and replay safety.
+
+## 15. Failure Handling
+
+| Failure | Required behavior |
+| --- | --- |
+| Provisioning failure | Persist recovery state and retry only idempotent steps |
+| Migration failure | Stop affected wave, preserve checkpoint, require recovery decision |
+| Canary degradation | Fence rollout expansion and evaluate rollback |
+| Regional outage | Follow configured regional failover policy |
+| Billing/provider outage | Preserve commercial state; reconcile later |
+| Lifecycle provider outage | Queue or suppress customer-facing actions according to policy |
+| SLA telemetry gap | Mark measurement incomplete rather than inventing compliance evidence |
+| Attribution replay | Deduplicate using stable event/referral keys |
+| Experiment service outage | Preserve assignment integrity or pause safely |
+| Growth analytics lag | Mark freshness state; do not silently present stale data as current |
+
+## 16. Security and Governance
+
+Stage 18 does not create a shortcut around the security architecture.
+
+Required controls include:
+
+- Strict tenant isolation
+- Role and capability separation
+- Contract and entitlement enforcement
+- Consent and suppression enforcement
+- Customer-data minimization
+- Region and residency controls
+- Immutable financial history
+- Auditable partner attribution
+- Protected SLA evidence
+- Controlled production access
+- Change approval for consequential configuration
+- Feature-flag governance
+- Release and rollback auditability
+
+Commercial or growth intelligence may recommend an action; the control plane remains authoritative for whether that action can execute.
+
+## 17. Production Readiness Gates
+
+~~~text
+PLATFORM HEALTH
+      ↓
+SECURITY VALIDATION
+      ↓
+TENANT ISOLATION
+      ↓
+ENTITLEMENT / BILLING VALIDATION
+      ↓
+INTEGRATION HEALTH
+      ↓
+DATA / MIGRATION VALIDATION
+      ↓
+POLICY / CONSENT VALIDATION
+      ↓
+OBSERVABILITY / SLO VALIDATION
+      ↓
+CANARY
+      ↓
+PRODUCTION WAVE
+~~~
+
+A failed gate prevents the next rollout stage unless an explicitly authorized exception is recorded with an audit trail.
+
+## 18. Testing Strategy
+
+### Unit
+
+- Funnel calculations
+- Activation milestone evaluation
+- Segment assignment
+- Expansion evidence
+- Partner attribution
+- SLA calculations
+- Rollout gates
+- Experiment assignment
+
+### Integration
+
+- Tenant provisioning
+- Billing and entitlement checks
+- Marketplace attribution
+- Customer lifecycle integrations
+- SLA telemetry
+- Migration checkpoints
+- Feature flags
+
+### Failure and resilience
+
+- Duplicate provisioning events
+- Replayed referrals
+- Regional failure
+- Migration interruption
+- Canary degradation
+- Stale telemetry
+- Provider outage
+- Rollback during active workflows
+
+### Security
+
+- Cross-tenant access
+- Unauthorized commercial changes
+- Unauthorized lifecycle messaging
+- Partner privilege escalation
+- SLA data access
+- Rollout authorization
+- Audit tampering
+
+### Acceptance criteria
+
+1. Production releases can be deployed through bounded tenant and regional waves.
+2. Canary health can stop rollout expansion.
+3. Rollback is explicit, authorized, and auditable.
+4. Tenant acquisition and activation milestones are measurable.
+5. Lifecycle automation remains policy and consent governed.
+6. Expansion opportunities expose evidence without creating unauthorized commercial commitments.
+7. Partner referrals and attribution are replay-safe.
+8. SLA measurements are traceable to authoritative telemetry.
+9. Growth cohorts and experiments are reproducible.
+10. Production incidents correlate with affected platform objects.
+11. Global onboarding respects region, residency, billing, and tenant isolation requirements.
+12. Growth analytics cannot bypass the control plane.
+
+## 19. Definition of Done
+
+~~~text
+PRODUCT → PLAN → ENTITLEMENT → TENANT → PROVISION → ONBOARD
+→ CONNECT → CONFIGURE → VALIDATE → ACTIVATE → METER → BILL
+→ OPERATE → SUPPORT → RENEW / EXPAND
+→ GLOBAL LAUNCH → GROWTH INTELLIGENCE → OPTIMIZE
+~~~
+
+The operational revenue loop remains:
+
+~~~text
+Signal → Intelligence → Prediction → Opportunity → NBA → Policy
+→ Routing → Workflow / Agent → Human Escalation → Execution
+→ Outcome → Attribution → Calibration → Optimization
+~~~
+
+Stage 18 adds the production distribution and growth layer around that loop without changing its authority boundaries.
+
+## 20. Stage 19 Roadmap
+
+Next: **Stage 19 — Global Platform Intelligence & Autonomous Business Operations**.
+
+Candidate scope includes cross-tenant platform intelligence with strict isolation, advanced capacity and unit-economics optimization, global partner economics, deeper revenue forecasting, enterprise operating intelligence, and bounded platform self-optimization. Any autonomous optimization remains subordinate to policy, authorization, consent, financial controls, and audit.
+
+## Core Principle
+
+**Growth increases adoption and commercial reach, not authorization authority.**

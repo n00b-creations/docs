@@ -37,7 +37,8 @@
               "leadops-build/stage-14-production-frontend",
               "leadops-build/stage-15-autonomous-revenue-ops",
               "leadops-build/stage-16-enterprise-hardening",
-              "leadops-build/stage-17-commercial-productization"
+              "leadops-build/stage-17-commercial-productization",
+              "leadops-build/stage-18-production-launch-growth"
             ]
           }
         ]
