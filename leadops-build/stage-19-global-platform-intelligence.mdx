@@ -1,0 +1,793 @@
+---
+title: "Stage 19 — Global Platform Intelligence & Autonomous Business Operations"
+sidebarTitle: "Stage 19 — Global Platform Intelligence"
+description: "Platform-wide intelligence, unit economics, capacity forecasting, anomaly detection, enterprise operating intelligence, optimization candidates, simulation, and bounded autonomous business operations."
+---
+
+# Stage 19 — Global Platform Intelligence & Autonomous Business Operations
+
+## Purpose
+
+Stage 19 adds a platform-wide intelligence layer above the production, commercial, revenue, and growth systems built in Stages 1–18. It provides cross-platform observability, capacity intelligence, unit-economics optimization, enterprise operating intelligence, partner economics, advanced forecasting, and bounded autonomous business operations.
+
+The layer is deliberately analytical and coordinating rather than an authorization bypass. Tenant data remains isolated, commercial records remain authoritative, and consequential actions continue through the existing control-plane, policy, consent, approval, and audit chain.
+
+## System Position
+
+~~~text
+Tenant / Platform Events
+        ↓
+Global Intelligence Fabric
+        ↓
+Cross-Domain Feature + Metric Layer
+        ↓
+Platform Intelligence
+        ├── Capacity Intelligence
+        ├── Unit Economics
+        ├── Revenue Forecasting
+        ├── Customer / Partner Intelligence
+        ├── Operational Intelligence
+        └── Anomaly / Risk Detection
+        ↓
+Optimization Candidates
+        ↓
+Policy / Authorization / Financial Controls
+        ↓
+Approved Execution or Human Review
+        ↓
+Outcome + Measurement
+        ↺
+~~~
+
+## Core Boundary
+
+Global intelligence may aggregate authorized metadata and metrics for platform operations, but it must not expose one tenant's customer or operational data to another tenant. Cross-tenant analytics use explicitly permitted, minimized, aggregated, or otherwise governed data products.
+
+**Intelligence increases decision quality; it does not increase authorization authority.**
+
+## Repository Architecture
+
+~~~text
+leadops/
+├── platform-intelligence/
+│   ├── fabric/
+│   ├── metrics/
+│   ├── features/
+│   ├── entity-resolution/
+│   ├── aggregation/
+│   └── lineage/
+├── business-intelligence/
+│   ├── unit-economics/
+│   ├── revenue/
+│   ├── capacity/
+│   ├── customer/
+│   ├── partner/
+│   └── enterprise/
+├── forecasting/
+│   ├── revenue/
+│   ├── demand/
+│   ├── capacity/
+│   ├── cash/
+│   ├── renewal/
+│   └── scenarios/
+├── optimization/
+│   ├── resource-allocation/
+│   ├── inference/
+│   ├── workflow/
+│   ├── connector/
+│   ├── support/
+│   ├── partner/
+│   └── commercial/
+├── anomaly-intelligence/
+│   ├── detection/
+│   ├── correlation/
+│   ├── investigation/
+│   └── escalation/
+├── autonomous-operations/
+│   ├── planners/
+│   ├── candidates/
+│   ├── policy-gates/
+│   ├── approvals/
+│   ├── execution/
+│   └── learning/
+├── enterprise-intelligence/
+│   ├── organizations/
+│   ├── sla/
+│   ├── compliance/
+│   ├── capacity/
+│   └── risk/
+├── api/
+│   └── intelligence/
+└── tests/
+    └── platform-intelligence/
+~~~
+
+## 1. Global Intelligence Fabric
+
+The intelligence fabric consumes authorized events and derived measurements from the existing LeadOps domains.
+
+Primary sources include:
+
+- Lead and opportunity events
+- Revenue and attribution events
+- Workflow and agent execution
+- Connector health
+- Usage and entitlement telemetry
+- Billing and commercial events
+- Customer lifecycle milestones
+- Partner attribution
+- SLA measurements
+- Infrastructure and SLO telemetry
+- Incident and remediation events
+- Model and experiment measurements
+
+Every intelligence record should retain source references, timestamp, tenant scope, aggregation scope, freshness, version, and lineage.
+
+### Processing flow
+
+~~~text
+EVENT / METRIC
+    ↓
+VALIDATE
+    ↓
+CLASSIFY
+    ↓
+MINIMIZE
+    ↓
+NORMALIZE
+    ↓
+DEDUPLICATE
+    ↓
+AGGREGATE
+    ↓
+FEATURE / METRIC STORE
+    ↓
+INTELLIGENCE PRODUCT
+~~~
+
+## 2. Data Scope and Isolation
+
+Platform intelligence supports three explicit scopes:
+
+| Scope | Purpose | Data boundary |
+| --- | --- | --- |
+| Tenant | Customer operations | Tenant-authorized data only |
+| Organization | Enterprise group reporting | Authorized organization scope |
+| Platform | Product and infrastructure operations | Aggregated/minimized platform data |
+
+Scope is an explicit field in every intelligence request. A platform-scoped query must not silently widen into raw tenant-level records.
+
+## 3. Unit Economics Intelligence
+
+Stage 19 introduces a normalized unit-economics layer for understanding the cost and value of platform operations.
+
+Candidate dimensions include:
+
+- Cost per lead processed
+- Cost per enrichment
+- Cost per workflow execution
+- Cost per agent task
+- AI inference cost
+- Communication cost
+- Connector API cost
+- Storage cost
+- Support cost
+- Customer acquisition cost
+- Revenue per active tenant
+- Revenue per workflow
+- Gross-margin contribution
+
+Each metric requires a documented denominator, period, source, allocation method, and confidence/freshness state.
+
+### Cost allocation
+
+Shared infrastructure costs may be allocated using deterministic drivers such as compute time, event volume, storage, API calls, inference tokens, or workflow executions. Allocation methodology is versioned so historical comparisons remain interpretable.
+
+## 4. Capacity Intelligence
+
+Capacity intelligence connects demand forecasts to available platform resources.
+
+Inputs include:
+
+- Queue depth
+- Event throughput
+- API request volume
+- Workflow concurrency
+- Agent utilization
+- Model inference load
+- Database utilization
+- Storage growth
+- Connector rate limits
+- Regional capacity
+
+Outputs include:
+
+- Capacity forecast
+- Saturation risk
+- Recommended scaling window
+- Estimated incremental cost
+- Resource constraint
+- Confidence
+
+Scaling recommendations remain subordinate to infrastructure policy, budgets, deployment controls, and approval requirements.
+
+## 5. Advanced Revenue Forecasting
+
+Revenue forecasting combines authorized commercial and operational signals.
+
+Forecast dimensions can include:
+
+- New business
+- Activation conversion
+- Renewal
+- Expansion
+- Contraction
+- Churn
+- Partner-sourced revenue
+- Usage-driven revenue
+- Contracted revenue
+
+Forecast scenarios:
+
+~~~text
+Observed Baseline
+Conservative
+Expected
+Upside
+Stress
+~~~
+
+Every forecast run records population, timestamp, methodology, model version, assumptions, input freshness, confidence intervals where available, and realized outcome when known.
+
+Forecast error should feed calibration rather than silently rewriting historical forecasts.
+
+## 6. Customer Intelligence
+
+Customer intelligence combines activation, adoption, support, operational, commercial, and revenue signals into an explainable customer operating view.
+
+Possible outputs:
+
+- Adoption trajectory
+- Product-fit indicators
+- Operational friction
+- Support burden
+- Renewal timing
+- Expansion opportunity
+- SLA exposure
+- Implementation risk
+
+Customer health remains a measurement system. It must not automatically change contract terms, suspend service, contact customers, or issue financial concessions without the appropriate authority.
+
+## 7. Partner Economics
+
+Partner intelligence measures ecosystem contribution while preserving deterministic attribution.
+
+Metrics include:
+
+- Referral conversion
+- Partner-sourced pipeline
+- Partner-sourced revenue
+- Implementation contribution
+- Marketplace contribution
+- Partner activation
+- Revenue share
+- Partner support cost
+- Partner retention
+
+Partner economics can identify program opportunities, but any revenue-share, contract, credit, or commercial change continues through Stage 17 commercial controls.
+
+## 8. Enterprise Operating Intelligence
+
+Enterprise intelligence provides a consolidated operational view across:
+
+- Regions
+- Organizations
+- Workspaces
+- SLOs
+- Incidents
+- Releases
+- Integrations
+- Workflows
+- Agents
+- Capacity
+- Cost
+- Security and compliance evidence
+
+Representative executive questions become queryable:
+
+- Where is platform capacity approaching saturation?
+- Which operational domains contribute the most cost?
+- Which release or integration correlates with elevated failure rates?
+- Which customer cohorts have the largest activation friction?
+- Where are SLA risks accumulating?
+- Which workloads have the highest inference cost?
+
+These are evidence queries, not autonomous policy decisions.
+
+## 9. Anomaly Intelligence
+
+Anomaly detection identifies deviations across operational and commercial telemetry.
+
+~~~text
+OBSERVATION
+    ↓
+BASELINE
+    ↓
+DEVIATION
+    ↓
+CONTEXT CORRELATION
+    ↓
+SEVERITY / CONFIDENCE
+    ↓
+INVESTIGATION
+    ↓
+ESCALATION OR POLICY-BOUNDED REMEDIATION
+~~~
+
+An anomaly record should contain the measured signal, baseline, deviation, time window, scope, confidence, correlated events, affected objects, and recommended next step.
+
+Detection must not be presented as proof of causation.
+
+## 10. Autonomous Business Operations
+
+Stage 19 introduces bounded planners that can propose and, where explicitly authorized, execute low-risk operational optimizations.
+
+Examples include:
+
+- Adjusting worker capacity within configured limits
+- Rebalancing non-consequential processing workloads
+- Recommending connector backoff
+- Scheduling approved maintenance
+- Recommending workflow optimization
+- Creating support or investigation tasks
+- Recommending customer-success actions
+- Identifying underutilized resources
+
+High-impact actions require approval or explicit pre-authorization.
+
+### Autonomous execution chain
+
+~~~text
+INTELLIGENCE
+    ↓
+OPTIMIZATION CANDIDATE
+    ↓
+RISK CLASSIFICATION
+    ↓
+POLICY CHECK
+    ↓
+ENTITLEMENT / CAPABILITY CHECK
+    ↓
+APPROVAL IF REQUIRED
+    ↓
+EXECUTION
+    ↓
+OBSERVATION
+    ↓
+ROLLBACK / ESCALATION IF NEEDED
+    ↓
+AUDIT
+~~~
+
+## 11. Optimization Candidate Contract
+
+~~~ts
+interface OptimizationCandidate {
+  id: string;
+  tenantId?: string;
+  scope: "TENANT" | "ORGANIZATION" | "PLATFORM";
+  domain: string;
+  actionType: string;
+  objective: string;
+  expectedBenefit?: number;
+  estimatedCost?: number;
+  riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  confidence: number;
+  evidence: EvidenceReference[];
+  requiredCapabilities: string[];
+  policyRequirements: string[];
+  rollbackPlan?: RollbackPlan;
+  expiresAt: string;
+  status:
+    | "PROPOSED"
+    | "APPROVED"
+    | "BLOCKED"
+    | "EXECUTING"
+    | "COMPLETED"
+    | "FAILED"
+    | "ROLLED_BACK"
+    | "ESCALATED";
+  idempotencyKey: string;
+  createdAt: string;
+}
+~~~
+
+Evidence should reference observable platform records rather than hidden reasoning.
+
+## 12. Risk Classification
+
+| Risk | Default behavior |
+| --- | --- |
+| LOW | May execute only when explicitly pre-authorized |
+| MEDIUM | Approval or narrowly scoped authorization |
+| HIGH | Human approval required |
+| CRITICAL | Block autonomous execution; escalate |
+
+Risk classification never overrides consent, suppression, tenant authorization, security policy, financial controls, or emergency kill switches.
+
+## 13. Platform Self-Optimization
+
+Self-optimization is limited to measurable, bounded objectives.
+
+~~~text
+MEASURE
+  ↓
+IDENTIFY BOTTLENECK
+  ↓
+GENERATE CANDIDATES
+  ↓
+SIMULATE / ESTIMATE
+  ↓
+POLICY + BUDGET GATE
+  ↓
+CANARY
+  ↓
+OBSERVE
+  ↓
+EXPAND OR ROLLBACK
+~~~
+
+Candidate objectives include:
+
+- Reduce processing latency
+- Reduce infrastructure cost
+- Improve workflow throughput
+- Reduce connector failure
+- Improve resource utilization
+- Reduce support backlog
+- Improve forecast calibration
+
+Security and authorization policy are not optimization objectives that the system may rewrite autonomously.
+
+## 14. Simulation and Digital Twin Layer
+
+Before high-impact optimization, Stage 19 can evaluate candidate changes against historical or synthetic workloads.
+
+Simulation inputs include:
+
+- Current configuration
+- Historical workload
+- Candidate configuration
+- Capacity constraints
+- Cost model
+- SLO targets
+- Failure assumptions
+
+Simulation output includes:
+
+- Expected performance delta
+- Cost delta
+- Capacity impact
+- SLO risk
+- Confidence
+- Rollback feasibility
+
+Simulation results are advisory until a governed execution decision is made.
+
+## 15. Learning Loop
+
+~~~text
+DECISION
+  ↓
+EXECUTION
+  ↓
+OBSERVED OUTCOME
+  ↓
+ATTRIBUTION
+  ↓
+MODEL / RULE EVALUATION
+  ↓
+CALIBRATION
+  ↓
+NEW CANDIDATE
+~~~
+
+Learning can update models, forecasts, ranking, calibration, and optimization proposals. It cannot silently modify authorization, consent, suppression, financial, or security policy.
+
+## 16. API Surface
+
+~~~text
+GET  /intelligence/overview
+GET  /intelligence/metrics
+GET  /intelligence/features
+GET  /intelligence/lineage
+GET  /intelligence/anomalies
+POST /intelligence/anomalies/:id/investigate
+
+GET  /intelligence/unit-economics
+GET  /intelligence/capacity
+GET  /intelligence/revenue
+GET  /intelligence/customer
+GET  /intelligence/partner
+GET  /intelligence/enterprise
+
+GET  /intelligence/forecasts
+POST /intelligence/forecasts/run
+GET  /intelligence/forecasts/:id
+
+GET  /optimization/candidates
+POST /optimization/candidates/evaluate
+POST /optimization/candidates/:id/approve
+POST /optimization/candidates/:id/reject
+POST /optimization/candidates/:id/execute
+POST /optimization/candidates/:id/rollback
+
+GET  /optimization/simulations
+POST /optimization/simulations
+GET  /optimization/simulations/:id
+
+GET  /autonomous-operations/status
+GET  /autonomous-operations/tasks
+GET  /autonomous-operations/policies
+POST /autonomous-operations/pause
+POST /autonomous-operations/resume
+~~~
+
+## 17. Data Model
+
+~~~text
+intelligence_products
+intelligence_metrics
+intelligence_features
+intelligence_lineage
+intelligence_snapshots
+unit_economics_records
+capacity_forecasts
+revenue_forecasts
+customer_intelligence_snapshots
+partner_economics_snapshots
+enterprise_intelligence_snapshots
+anomaly_records
+optimization_candidates
+optimization_evaluations
+optimization_executions
+optimization_rollbacks
+simulation_runs
+autonomous_operation_tasks
+autonomous_operation_policies
+~~~
+
+Each record carries appropriate scope, tenant context when applicable, source lineage, freshness, version, correlation ID, and audit linkage.
+
+## 18. Event Contracts
+
+Representative events:
+
+~~~text
+intelligence.metric_computed
+intelligence.snapshot_created
+intelligence.anomaly_detected
+intelligence.investigation_started
+intelligence.investigation_completed
+
+forecast.revenue_completed
+forecast.capacity_completed
+forecast.calibration_completed
+
+optimization.candidate_created
+optimization.candidate_approved
+optimization.candidate_blocked
+optimization.execution_started
+optimization.execution_completed
+optimization.execution_failed
+optimization.rollback_started
+optimization.rollback_completed
+
+autonomous.operation_created
+autonomous.operation_paused
+autonomous.operation_resumed
+autonomous.operation_escalated
+~~~
+
+Events remain replay-safe and inherit tenant/scope, ordering, idempotency, versioning, audit, and authorization requirements.
+
+## 19. Governance and Financial Controls
+
+Platform intelligence must never become an alternate billing or authorization database.
+
+Authoritative systems remain:
+
+- Identity and tenant membership
+- Entitlement service
+- Authorization/control plane
+- Consent and suppression service
+- Commercial ledger
+- Billing system
+- Audit system
+- Policy engine
+- System of record for customer and contract state
+
+Intelligence systems consume these records and produce measurements or recommendations. They do not silently replace the source of truth.
+
+## 20. Kill Switches
+
+Autonomous operations require layered kill switches:
+
+~~~text
+GLOBAL
+  ↓
+REGION
+  ↓
+TENANT
+  ↓
+DOMAIN
+  ↓
+WORKFLOW
+  ↓
+AGENT
+  ↓
+ACTION TYPE
+~~~
+
+Each switch records who or what changed it, when, why, affected scope, previous state, new state, and expiration if temporary.
+
+## 21. Failure Handling
+
+| Failure | Required behavior |
+| --- | --- |
+| Intelligence pipeline unavailable | Preserve source events and mark intelligence stale |
+| Feature store unavailable | Fall back to approved deterministic behavior or wait |
+| Forecast service unavailable | Preserve previous forecast version; mark freshness |
+| Optimization evaluation unavailable | Do not execute candidate |
+| Policy service unavailable | Fail closed for consequential autonomous actions |
+| Rollback unavailable | Fence further execution and escalate |
+| Cross-scope query violation | Block request and audit security event |
+| Cost data delayed | Mark allocation incomplete rather than fabricate values |
+| Model drift detected | Route to governance/evaluation workflow |
+| Autonomous loop instability | Trigger bounded pause and escalation |
+
+## 22. Observability
+
+Stage 19 adds platform-intelligence observability:
+
+- Intelligence freshness
+- Feature computation latency
+- Metric completeness
+- Forecast error
+- Calibration error
+- Anomaly precision/false-positive tracking
+- Optimization acceptance rate
+- Optimization benefit realized
+- Rollback rate
+- Autonomous execution rate
+- Policy block rate
+- Approval rate
+- Cost savings realized
+- Capacity forecast error
+- Unit-economics variance
+- Cross-scope access violations
+
+All autonomous metrics must distinguish recommendation from execution and execution from realized outcome.
+
+## 23. Command Center Integration
+
+Stage 13/14 receives a **Platform Intelligence** workspace.
+
+Panels include:
+
+- Global platform health
+- Capacity map
+- Unit economics
+- Revenue forecast
+- Customer intelligence
+- Partner economics
+- Anomaly queue
+- Optimization candidates
+- Simulation results
+- Autonomous operations
+- Policy blocks
+- Rollbacks
+- Model/calibration status
+
+Tenant users see only permitted tenant or organization scope. Platform operators see platform-level views according to their role and data-access permissions.
+
+## 24. Testing Strategy
+
+### Unit
+
+- Metric calculations
+- Cost allocation
+- Forecast calculations
+- Risk classification
+- Optimization scoring
+- Anomaly thresholds
+- Scope enforcement
+- Candidate expiration
+
+### Integration
+
+- Event ingestion
+- Feature computation
+- Forecast pipeline
+- Policy checks
+- Entitlement checks
+- Commercial ledger references
+- Rollback execution
+- Kill switches
+
+### Security
+
+- Cross-tenant query attempts
+- Organization boundary violations
+- Platform-data exposure
+- Unauthorized optimization execution
+- Unauthorized commercial changes
+- Policy bypass attempts
+- Audit tampering
+
+### Resilience
+
+- Event replay
+- Feature-store outage
+- Forecast outage
+- Policy outage
+- Regional failure
+- Rollback failure
+- Duplicate optimization commands
+- Autonomous-loop instability
+
+### Acceptance criteria
+
+1. Platform intelligence consumes authorized events without replacing authoritative systems.
+2. Tenant, organization, and platform scopes are explicit and enforced.
+3. Unit economics are reproducible from versioned allocation methods.
+4. Capacity intelligence exposes demand, constraints, and cost.
+5. Revenue forecasts are versioned and calibrated.
+6. Customer and partner intelligence remains explainable and governed.
+7. Anomalies provide evidence and context without claiming unsupported causation.
+8. Optimization candidates have explicit risk, evidence, expiration, and rollback information.
+9. Consequential optimization cannot execute without the required policy and authorization.
+10. Simulation can precede high-impact optimization.
+11. Kill switches can halt autonomous operations at multiple scopes.
+12. Autonomous failures fail closed for consequential actions.
+13. Cross-tenant access attempts are blocked and audited.
+14. Outcomes feed calibration without silently changing authorization policy.
+
+## 25. Definition of Done
+
+~~~text
+EVENTS
+  ↓
+GLOBAL INTELLIGENCE
+  ↓
+METRICS / FEATURES / FORECASTS
+  ↓
+ANOMALY + BUSINESS INTELLIGENCE
+  ↓
+OPTIMIZATION CANDIDATES
+  ↓
+SIMULATION / RISK
+  ↓
+POLICY / ENTITLEMENT / AUTHORIZATION
+  ↓
+APPROVAL OR PRE-AUTHORIZED EXECUTION
+  ↓
+OBSERVATION
+  ↓
+ROLLBACK / ESCALATION
+  ↓
+OUTCOME / CALIBRATION
+  ↺
+~~~
+
+Stage 19 is complete when the platform can understand its own operating economics, capacity, customer lifecycle, partner ecosystem, forecasts, anomalies, and optimization opportunities while preserving strict tenant isolation and the existing authorization architecture.
+
+## Stage 20 Roadmap
+
+Next: **Stage 20 — Global Autonomous Platform Control & Enterprise Operating System**.
+
+Candidate scope includes a unified platform operating plane, global control-room workflows, deeper predictive capacity management, policy simulation, enterprise command operations, advanced disaster orchestration, and bounded self-healing across the complete LeadOps lifecycle.
+
+## Core Principle
+
+**The platform may optimize how it operates; it may not autonomously redefine what it is authorized to do.**
