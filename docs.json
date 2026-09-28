@@ -39,7 +39,8 @@
               "leadops-build/stage-16-enterprise-hardening",
               "leadops-build/stage-17-commercial-productization",
               "leadops-build/stage-18-production-launch-growth",
-              "leadops-build/stage-19-global-platform-intelligence"
+              "leadops-build/stage-19-global-platform-intelligence",
+              "leadops-build/stage-20-global-autonomous-control"
             ]
           }
         ]
