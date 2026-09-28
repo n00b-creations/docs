@@ -1,0 +1,42 @@
+---
+title: "Stage 23 — Backend Services & Production APIs"
+sidebarTitle: "Stage 23 — Backend Services"
+description: "Core LeadOps services, APIs, authorization, validation, jobs, and service contracts."
+---
+
+# Stage 23 — Backend Services & Production APIs
+
+Implement the executable backend corresponding to Stages 1–20.
+
+## Services
+- Identity and access
+- Tenant and organization
+- Leads/accounts/contacts
+- Signal ingestion
+- Enrichment
+- Scoring and qualification
+- Routing
+- Communications
+- Workflow automation
+- Agent runtime
+- Revenue operations
+- Intelligence
+- Integrations
+- Control plane
+- Audit and evidence
+
+## API requirements
+Every endpoint defines:
+- request/response schema
+- authentication requirement
+- capability requirement
+- tenant scope
+- rate limit
+- idempotency behavior
+- audit behavior
+- error contract
+
+Use REST for resource operations and event-driven commands for asynchronous work. Long-running operations return durable execution IDs.
+
+## Security
+Authorization is enforced server-side. Frontend visibility is never treated as authorization. Service-to-service calls carry signed identity and scope context.
