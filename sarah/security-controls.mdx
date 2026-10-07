@@ -1,0 +1,129 @@
+---
+title: "SARAH — Security Controls and Execution Policy"
+description: "Security boundaries for autonomous security operations, tool execution, evidence, and approvals."
+sidebarTitle: "SARAH — Security Controls and Execution Policy"
+---
+
+# Security Controls and Execution Policy
+
+SARAH is designed for high-visibility security automation, not unrestricted autonomous hacking. The following controls are mandatory for the proposed implementation.
+
+## Execution boundaries
+
+Workers performing security analysis should run in rootless containers or isolated VMs with:
+
+- dedicated per-task filesystem
+- restricted egress
+- bounded CPU, memory, and runtime
+- read-only credentials by default
+- explicit target allowlists
+- rate limits
+- kill switch
+- restricted secret injection
+- immutable execution metadata
+
+Analysis tools and state-changing tools must remain separate.
+
+## Approval model
+
+The approval record should bind the exact operation to:
+
+- agent identity
+- case/task identifier
+- target
+- environment
+- requested tool/action
+- immutable parameters
+- risk tier
+- expiry
+- approver
+- approval identifier
+- execution result
+
+Reject:
+
+- approval replay
+- expired approvals
+- wrong-target approvals
+- consumed approvals
+- parameter mutation after approval
+
+## Audit record
+
+Every security operation should be attributable through an append-oriented record containing:
+
+- agent identity
+- prompt/task identifier
+- tool call
+- target
+- timestamp
+- approval identifier where applicable
+- output/evidence hash
+- result
+- environment
+- permission level
+
+Audit evidence must not be deletable through normal application APIs.
+
+## Prompt-injection handling
+
+Security data is untrusted input. Indicators, documents, repository content, tickets, emails, and external enrichment results may contain instructions intended to manipulate an agent.
+
+SARAH should treat such content as evidence, not authority.
+
+A prompt-injection-style instruction should be:
+
+1. identified
+2. preserved as evidence
+3. downgraded to review
+4. excluded from authority decisions
+5. surfaced to SENTINEL/SARAH
+6. recorded in the audit trail
+
+## Active lab validation
+
+Active assessment is a later phase:
+
+1. Agent proposes a bounded plan.
+2. SENTINEL verifies signed authorization, target allowlist, risk, time, and rate limits.
+3. Human approves the immutable job.
+4. An ephemeral isolated runner executes it.
+5. Evidence is collected and hashed.
+6. The runner is destroyed.
+7. Results are reviewed before any follow-on action.
+
+Production targets must not inherit lab authorization.
+
+## Safety-oriented tool policy
+
+The SARAH layer should prefer tools that improve visibility and defensive validation. High-risk capabilities remain disabled by default. The platform should never interpret the presence of a tool in a catalog as authorization to execute it.
+
+## Evidence integrity
+
+Evidence artifacts should carry:
+
+- stable artifact identifier
+- source
+- acquisition timestamp
+- case/task relationship
+- content hash
+- provenance
+- collector/agent identity
+- retention classification
+
+The UI should expose evidence completeness and provenance status without exposing hidden reasoning.
+
+## Professional gamification
+
+The supplied architecture permits a restrained operational progression system:
+
+- mission/case cards
+- incident timeline milestones
+- readiness meter
+- evidence completeness score
+- detection coverage map
+- skill progression
+- case badges
+- subtle completion effects
+
+Do not reward raw tool-call volume, offensive activity, or destructive actions. The system should reward evidence quality, successful reviews, safe closure, and measurable defensive outcomes.

@@ -1,0 +1,139 @@
+---
+title: "SARAH — Repository Architecture Mapping"
+description: "Maps the SARAH security operations design onto the existing Cyber AI Team repository."
+sidebarTitle: "SARAH — Repository Architecture Mapping"
+---
+
+# Repository Architecture Mapping
+
+This page maps the proposed SARAH design onto the repository that was inspected during implementation planning.
+
+## Existing foundations
+
+The repository already contains:
+
+- `backend/src/cyber_team/agents` — agent lifecycle and orchestration
+- `backend/src/cyber_team/api` — FastAPI routes, auth, authorization, and rate limits
+- `backend/src/cyber_team/audit` — audit/control evidence
+- `backend/src/cyber_team/authorization` — policy enforcement
+- `backend/src/cyber_team/memory` — memory services
+- `backend/src/cyber_team/operations` — governor, planning, readiness, autonomous operations, outcomes
+- `backend/src/cyber_team/roles` — role catalog and activation
+- `backend/src/cyber_team/tools` — governed tool registry
+- `backend/src/cyber_team/workflows` — workflow compilation/templates
+- `frontend/src/components` — existing owner-console views
+- `frontend/src/app/page.tsx` — view routing and authenticated shell
+
+## Proposed additive modules
+
+The following modules are proposed rather than currently present:
+
+```text
+backend/src/cyber_team/sarah/
+├── __init__.py
+├── case_model.py
+├── event_model.py
+├── event_bus.py
+├── policy.py
+├── evidence.py
+├── roster.py
+└── service.py
+
+backend/src/cyber_team/api/routes/
+└── sarah.py
+
+backend/tests/
+└── test_sarah_events.py
+
+frontend/src/components/sarah/
+├── SarahCommandCenter.tsx
+├── CommandBridge.tsx
+├── AlertWall.tsx
+├── AgentStations.tsx
+├── CaseTimeline.tsx
+├── EvidenceVault.tsx
+├── ApprovalDrawer.tsx
+└── LiveTeamDialog.tsx
+```
+
+These names are an implementation target, not a claim that the files already exist.
+
+## Normalized event contract
+
+The UI should consume a stable `AgentActivityEvent` contract:
+
+```json
+{
+  "id": "evt-uuid",
+  "timestamp": "2026-10-06T20:00:00Z",
+  "caseId": "case-uuid",
+  "taskId": "task-uuid",
+  "agentId": "ATLAS",
+  "category": "analysis",
+  "summary": "Indicator enrichment completed",
+  "detail": "Read-only enrichment returned corroborating evidence.",
+  "scope": "lab",
+  "targetLabel": "indicator:example",
+  "permission": "read",
+  "tool": {
+    "name": "enrich_indicator",
+    "action": "lookup",
+    "result": "success",
+    "durationMs": 842
+  },
+  "evidence": {
+    "artifactIds": ["artifact-uuid"],
+    "hashes": ["sha256:..."],
+    "sourceRefs": ["source:..."]
+  },
+  "confidence": 0.91,
+  "risk": "low",
+  "humanApprovalRequired": false
+}
+```
+
+The event stream is an observability surface. It is not a model chain-of-thought surface.
+
+## Existing API integration points
+
+The current dashboard and audit routes already expose useful primitives:
+
+- dashboard KPIs
+- agent status
+- approval queue
+- recent activity
+- workflow visualizations
+- audit events
+
+SARAH should consume these services rather than create parallel implementations where the existing contracts are sufficient.
+
+## Tool gateway
+
+The proposed SARAH gateway should wrap the existing tool registry with security-specific policy:
+
+| Tier | Meaning | Default |
+| --- | --- | --- |
+| Green | Passive/read-only | Enabled |
+| Blue | Controlled defensive validation | Enabled with bounded scope |
+| Amber | Active assessment | Lab-only + approval |
+| Red | High-risk offensive capability | Disabled by default |
+| Blocked | Unauthorized access, exfiltration, persistence, credential theft, destructive behavior | Never exposed |
+
+The entire BlackArch/Kali/Parrot ecosystem should **not** be handed directly to agents. Tools should be curated, classified, wrapped, and audited individually.
+
+## First security adapters
+
+Initial read-only or defensive adapters should prioritize:
+
+- SIEM event retrieval
+- asset inventory queries
+- indicator enrichment
+- repository read-only scanning
+- SBOM generation
+- container image analysis
+- vulnerability database queries
+- Sigma/YARA validation
+- configuration and policy checks
+- evidence collection in isolated analysis environments
+
+Active validation is a later milestone and must require explicit scope, authorization, rate/time limits, isolated execution, immutable job parameters, and human approval.

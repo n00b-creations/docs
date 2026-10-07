@@ -1,0 +1,94 @@
+---
+title: "SARAH Command Center — Overview"
+description: "Security Analysis, Response, Automation, and Human-in-the-loop command center built on Cyber AI Team."
+sidebarTitle: "SARAH Command Center — Overview"
+---
+
+# SARAH Command Center
+
+SARAH is the proposed security-operations layer for **Cyber AI Team**. It turns the existing governed AI company OS into a security-focused command center without discarding the repository's existing control plane, approvals, audit trail, memory, workflows, or owner console.
+
+> **Source basis:** This architecture follows the Cyber AI Team repository and the supplied 209-page SARAH/Munder Difflin/Cyber AI Team analysis. Where this page proposes new components, they are explicitly labeled as proposed.
+
+## Product boundary
+
+The existing Cyber AI Team remains the system foundation:
+
+- FastAPI control plane
+- Next.js/React owner console
+- governed tool registry
+- role activation and orchestration
+- approval records
+- immutable audit evidence
+- memory and workflow services
+- Docker Compose deployment and observability
+
+SARAH adds a security-operations domain model above those primitives.
+
+## Command model
+
+| Layer | Responsibility |
+| --- | --- |
+| SARAH Command UI | Case command bridge, agent activity, alert wall, evidence, approvals, timelines |
+| SARAH Control Plane | Case state, normalized security events, policy evaluation, agent dispatch |
+| Cyber AI Team | Existing authentication, orchestration, tools, memory, workflows, approvals, audit |
+| Security Tool Gateway | Target allowlists, authorization scope, risk tiering, rate limits, approval enforcement |
+| Isolated Execution | Rootless containers or isolated VMs for controlled security analysis |
+| Evidence Layer | Append-oriented artifacts, hashes, source references, case timeline |
+
+## Agent roster
+
+- **SARAH** — command lead and safety orchestrator
+- **ATLAS** — threat intelligence analyst
+- **NOVA** — detection engineer
+- **ECHO** — incident triage analyst
+- **VAULT** — digital forensics and evidence custodian
+- **PATCH** — DevSecOps and application-security reviewer
+- **SENTINEL** — policy and compliance reviewer
+- **SCRIBE** — technical and executive reporting agent
+
+SARAH's role is coordination and safety. It should not become an unrestricted execution agent.
+
+## Initial operating mode
+
+The first milestone is a **read-only incident-investigation swarm**:
+
+1. An alert supplies an IP, domain, hash, asset, repository, or case identifier.
+2. SARAH creates a bounded case and assigns enrichment work.
+3. ATLAS, ECHO, NOVA, and VAULT perform read-only analysis in their allowed scopes.
+4. Findings are normalized into structured evidence.
+5. SENTINEL reviews conflicts, unsupported claims, and policy violations.
+6. SCRIBE produces a report from the evidence set.
+7. Any state-changing action becomes an explicit approval request.
+
+No external scan, ticket creation, code push, firewall/cloud change, or outbound communication should execute merely because an agent requested it.
+
+## UI workspaces
+
+The proposed command center supports four modes:
+
+- **SOC Command Center** — full operational room
+- **Office** — broader company/agent view
+- **Executive Briefing** — condensed risk and readiness view
+- **Minimal Operations** — low-distraction incident mode
+
+The SOC Command Center should expose:
+
+- command bridge
+- active cases
+- alert wall
+- agent stations
+- threat-intelligence desk
+- detection engineering pod
+- DevSecOps review bay
+- digital-forensics evidence vault
+- sandbox chamber
+- approval desk
+- executive briefing panel
+- expandable live team dialog
+
+The live dialog must be generated from structured agent events and tool results. It must not expose hidden model reasoning.
+
+## Implementation principle
+
+Build SARAH as an additive domain layer. Do not replace the existing Cyber AI Team governance model. Existing approval, authorization, audit, memory, and tool controls remain the enforcement boundary.
