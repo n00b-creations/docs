@@ -16,6 +16,16 @@
           "index",
           "quickstart"
         ]
+      },
+      "untitled-page",
+      {
+        "group": "SARAH Command Center",
+        "icon": "shield-halved",
+        "pages": [
+          "sarah/overview",
+          "sarah/architecture-mapping",
+          "sarah/security-controls"
+        ]
       }
     ],
     "global": {

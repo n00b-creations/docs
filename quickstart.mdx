@@ -1,47 +1,71 @@
 ---
 title: "Quickstart"
-description: "Begin with a guide on the fastest path to a successful outcome"
+description: "Start the SARAH Command Center documentation and implementation workflow."
 ---
 
-Describe how someone begins using your product. What is the first thing they need to do? Are there any prerequisites?
+# Quickstart
 
-A quickstart should take someone from zero to using your product. They'll get a quick win and a sense of what they can accomplish.
+This documentation tracks the proposed SARAH Command Center implementation for **Hyper-AI-Lab/cyber-ai-team**.
 
-## Prerequisites
+## What is already present
 
-Before you begin, you must have:
+The inspected source repository already provides the core operating system:
 
-- Requirement one (for example, Node.js 18+, a free account, an API key)
-- Requirement two (for example, a compatible device, a compatible browser, a compatible operating system)
+- FastAPI backend
+- authenticated Next.js owner console
+- agent manager and orchestration
+- governed tool registry
+- authorization and rate limiting
+- approval workflows
+- audit/control evidence
+- memory and workflow services
+- production-readiness and observability infrastructure
 
-## Get started
+## What SARAH adds
+
+SARAH adds the security-operations domain:
+
+1. Security cases and normalized security events.
+2. Security-specific agent roster.
+3. Case timeline and evidence model.
+4. Security tool risk tiers.
+5. Target/scope validation.
+6. Read-only investigation workflows.
+7. Approval-gated active validation.
+8. Command-center visualization.
+9. Evidence-aware reporting.
+
+## Recommended build sequence
 
 <Steps>
-  <Step title="Install">
-    Describe how to install your product or sign up.
-
-    ```bash
-    npm install your-package
-    ```
+  <Step title="Establish the event contract">
+    Add the normalized AgentActivityEvent model and validator. Every UI activity item should originate from a structured event rather than free-form model output.
   </Step>
-  <Step title="Configure">
-    Describe any setup or configuration needed before first use.
-
-    ```bash
-    your-cli init
-    ```
+  <Step title="Add the SARAH case model">
+    Introduce case, task, evidence, target scope, and approval relationships while reusing the existing audit and authorization primitives.
   </Step>
-  <Step title="Run it">
-    Show the first thing a user does to see it working.
-
-    ```bash
-    your-cli start
-    ```
+  <Step title="Add the security roster">
+    Register SARAH, ATLAS, NOVA, ECHO, VAULT, PATCH, SENTINEL, and SCRIBE as security-domain roles with explicit permissions.
+  </Step>
+  <Step title="Build the read-only investigation swarm">
+    Start with alert enrichment, SIEM correlation, asset lookup, repository scanning, SBOM/vulnerability analysis, and evidence collection.
+  </Step>
+  <Step title="Build the command center">
+    Add the command bridge, alert wall, agent stations, case timeline, evidence vault, approval drawer, and live team dialog to the existing Next.js console.
+  </Step>
+  <Step title="Add isolated active validation">
+    Only after the read-only path is stable, add lab-only execution through ephemeral isolated runners with immutable approval parameters.
   </Step>
 </Steps>
 
-<Tip>
-  Give people a way to get help. This could be a link to a support page, a chat with a customer support agent, or a forum for your product.
+## Security invariant
 
-  Example: Need help? Reach out to us at [support@yourcompany.com](mailto:support@yourcompany.com).
-</Tip>
+A tool being registered does not mean an agent is authorized to execute it.
+
+Every state-changing or active operation must pass authorization, target scope, risk policy, rate/time limits, and—where required—human approval.
+
+## Documentation map
+
+- [SARAH overview](/sarah/overview)
+- [Repository architecture mapping](/sarah/architecture-mapping)
+- [Security controls and execution policy](/sarah/security-controls)
